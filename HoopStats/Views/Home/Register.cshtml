@@ -1,0 +1,72 @@
+<form id="registerForm"  onsubmit="return validateRegisterForm()">
+    <h2>הרשמה:</h2>
+    <div class="form-group">
+        <label for="fName">שם פרטי:</label>
+        <input type="text" id="fName" name="fName">
+        <div class="error-message" id="fName-error"></div>
+    </div>
+    <div class="form-group">
+        <label for="lName">שם משפחה:</label>
+        <input type="text" id="lName" name="lName">
+        <div class="error-message" id="lName-error"></div>
+    </div>
+    <div class="form-group">
+        <label for="uName">שם משתמש:</label>
+        <input type="text" id="uName" name="uName">
+        <div class="error-message" id="uName-error"></div>
+    </div>
+    <div class="form-group">
+        <label for="email">אימייל:</label>
+        <input type="email" id="email" name="email">
+        <div class="error-message" id="email-error"></div>
+    </div>
+    <div class="form-group">
+        
+        <label for="gender">מגדר:</label>
+        <input type="radio" name="gender" value="male" checked>זכר
+        <input type="radio" name="gender" value="female">נקבה <BR>
+    </div>
+    <div class="form-group">
+        <label for="password">סיסמה:</label>
+        <input type="password" id="password" name="password">
+        <div class="error-message" id="password-error"></div>
+    </div>
+    <input type="submit" class="btn" value="הרשם">
+</form>
+
+<!-- הודעת תודה וטבלת ערכים -->
+<div id="thankYouSection" class="hidden">
+    <div class="thank-you">
+        <h2>תודה שנרשמת!</h2>
+        <p>אנחנו שמחים לראות אותך איתנו</p>
+    </div>
+
+    <h3>הנתונים שלך:</h3>
+    <table>
+        <tr>
+            <th>שדה</th>
+            <th>ערך</th>
+        </tr>
+        <tr>
+            <td>שם פרטי</td>
+            <td id="tableFName"></td>
+        </tr>
+        <tr>
+            <td>שם משפחה</td>
+            <td id="tableLName"></td>
+        </tr>
+        <tr>
+            <td>שם משתמש</td>
+            <td id="tableUName"></td>
+        </tr>
+        <tr>
+            <td>אימייל</td>
+            <td id="tableEmail"></td>
+        <tr>
+        </tr>
+        <td>מין</td>
+        <td id="tableGender"></td>
+        </tr>
+    </table>
+</div>
+</div>

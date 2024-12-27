@@ -1,0 +1,23 @@
+<form id="loginForm" onsubmit="return validateLoginForm()">
+    <h2>התחברות:</h2>
+    <div class="form-group">
+        <label for="loginUsername">שם משתמש:</label>
+        <input type="text" id="loginUsername" name="loginUsername">
+        <div class="error-message" id="loginUsername-error"></div>
+    </div>
+    <div class="form-group">
+        <label for="loginPassword">סיסמה:</label>
+        <input type="password" id="loginPassword" name="loginPassword">
+        <div class="error-message" id="loginPassword-error"></div>
+    </div>
+    <input type="submit" class="btn" value="התחבר">
+</form>
+
+<div id="thankYouSection" class="hidden">
+    <div class="thank-you">
+        <h2>תודה שנרשמת!</h2>
+        <p>אנחנו שמחים לראות אותך איתנו</p>
+    </div>
+
+
+</div>
