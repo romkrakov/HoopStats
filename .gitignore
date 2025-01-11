@@ -3,3 +3,4 @@ bin/*
 HoopStats/bin/** 
 HoopStats/obj/** 
 .DS_Store
+.vs
