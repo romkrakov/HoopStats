@@ -29,6 +29,25 @@ public class HomeController : Controller
     {
         return View();
     }
+    [HttpPost]
+    public IActionResult Login(LoginViewModel model)
+    {
+        if (ModelState.IsValid)
+        {
+            var user = _context.Users.FirstOrDefault(u => 
+                u.Username == model.Username && 
+                u.Password == model.Password);
+
+            if (user != null)
+            {
+                TempData["Action"] = "Login";
+                return RedirectToAction("ThankYou", new { id = user.Id });
+            }
+            
+            ModelState.AddModelError("", "שם משתמש או סיסמה שגויים");
+        }
+        return View(model);
+    }
     public IActionResult Register()
     {
         return View();
@@ -52,6 +71,7 @@ public class HomeController : Controller
 
                 _context.Users.Add(user);
                 _context.SaveChanges();
+                TempData["Action"] = "Register";
                 return RedirectToAction("ThankYou", new { id = user.Id });
             }
             catch (DbUpdateException ex)

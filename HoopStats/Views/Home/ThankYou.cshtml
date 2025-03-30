@@ -1,6 +1,13 @@
 @model HoopStats.Models.User
 
-<h2>תודה שנרשמת!</h2>
+@if (TempData["Action"]?.ToString() == "Login")
+{
+    <h2>ברוך שובך!</h2>
+}
+else
+{
+    <h2>תודה שנרשמת!</h2>
+}
 <p>אנחנו שמחים לראות אותך איתנו</p>
 
 <h3>הנתונים שלך:</h3>
