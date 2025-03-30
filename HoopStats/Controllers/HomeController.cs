@@ -2,6 +2,8 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using HoopStats.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
+using System.Text.Json;
 
 namespace HoopStats.Controllers;
 
@@ -40,6 +42,9 @@ public class HomeController : Controller
 
             if (user != null)
             {
+                // Store user info in session
+                HttpContext.Session.SetString("UserId", user.Id.ToString());
+                HttpContext.Session.SetString("Username", user.Username);
                 TempData["Action"] = "Login";
                 return RedirectToAction("ThankYou", new { id = user.Id });
             }
@@ -48,6 +53,7 @@ public class HomeController : Controller
         }
         return View(model);
     }
+
     public IActionResult Register()
     {
         return View();
@@ -71,6 +77,8 @@ public class HomeController : Controller
 
                 _context.Users.Add(user);
                 _context.SaveChanges();
+                HttpContext.Session.SetString("UserId", user.Id.ToString());
+                HttpContext.Session.SetString("Username", user.Username);
                 TempData["Action"] = "Register";
                 return RedirectToAction("ThankYou", new { id = user.Id });
             }
@@ -91,6 +99,13 @@ public class HomeController : Controller
         }
         return View(user);
     }
+
+    public IActionResult Logout()
+    {
+        HttpContext.Session.Clear();
+        return RedirectToAction("Index");
+    }
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
