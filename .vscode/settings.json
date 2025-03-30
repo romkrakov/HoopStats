@@ -1,3 +1,12 @@
 {
-    "dotnet.defaultSolution": "HoopStats.sln"
+    "dotnet.defaultSolution": "HoopStats.sln",
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "database": "HoopStats/db/site.db",
+            "name": "HoopStats"
+        }
+    ],
+    "sqltools.useNodeRuntime": true
 }

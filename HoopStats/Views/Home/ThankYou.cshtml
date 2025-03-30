@@ -1,0 +1,32 @@
+@model HoopStats.Models.User
+
+<h2>תודה שנרשמת!</h2>
+<p>אנחנו שמחים לראות אותך איתנו</p>
+
+<h3>הנתונים שלך:</h3>
+<table class="table">
+    <tr>
+        <th>שדה</th>
+        <th>ערך</th>
+    </tr>
+    <tr>
+        <td>שם פרטי</td>
+        <td>@Model.FirstName</td>
+    </tr>
+    <tr>
+        <td>שם משפחה</td>
+        <td>@Model.LastName</td>
+    </tr>
+    <tr>
+        <td>שם משתמש</td>
+        <td>@Model.Username</td>
+    </tr>
+    <tr>
+        <td>אימייל</td>
+        <td>@Model.Email</td>
+    </tr>
+    <tr>
+        <td>מין</td>
+        <td>@(Model.Gender == "male" ? "זכר" : "נקבה")</td>
+    </tr>
+</table>
