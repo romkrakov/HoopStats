@@ -2,37 +2,37 @@
 @model IEnumerable<HoopStats.Models.GameStats>
 
 @{
-    ViewData["Title"] = $"{ViewBag.PlayerName} - Stats";
+    ViewData["Title"] = $"{ViewBag.PlayerName} - סטטיסטיקות";
 }
 
-<div class="container mt-4">
-    <h2>@ViewBag.PlayerName's Statistics</h2>
+<div class="container-fluid stats-container mt-4">
+    <h2>סטטיסטיקות של @ViewBag.PlayerName</h2>
 
     <div class="card mb-4">
         <div class="card-body">
-            <h5 class="card-title">Season Averages</h5>
+            <h5 class="card-title">ממוצעים לעונה</h5>
             <div class="row">
                 <div class="col-md-3">
                     <div class="stat-box">
-                        <span class="stat-label">PPG</span>
+                        <span class="stat-label">נק' למשחק</span>
                         <span class="stat-value">@Model.Average(s => s.Points).ToString("F1")</span>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="stat-box">
-                        <span class="stat-label">RPG</span>
+                        <span class="stat-label">ריב' למשחק</span>
                         <span class="stat-value">@Model.Average(s => s.TotalRebounds).ToString("F1")</span>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="stat-box">
-                        <span class="stat-label">APG</span>
+                        <span class="stat-label">אס' למשחק</span>
                         <span class="stat-value">@Model.Average(s => s.Assists).ToString("F1")</span>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="stat-box">
-                        <span class="stat-label">FG%</span>
+                        <span class="stat-label">אחוזי קליעה</span>
                         <span class="stat-value">@{
                             var fga = Model.Sum(s => s.FieldGoalsAttempted);
                             if (fga > 0)
@@ -50,50 +50,50 @@
         </div>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-striped align-middle">
+    <div class="table-responsive-xl">
+        <table class="table table-striped align-middle player-stats-table">
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Team</th>
-                    <th>Opponent</th>
-                    <th>MIN</th>
-                    <th>PTS</th>
-                    <th>REB</th>
-                    <th>AST</th>
-                    <th>STL</th>
-                    <th>BLK</th>
-                    <th>FG</th>
-                    <th>3P</th>
-                    <th>FT</th>
+                    <th class="col-date">תאריך</th>
+                    <th class="col-team">קבוצה</th>
+                    <th class="col-team">יריבה</th>
+                    <th class="col-num">דקות</th>
+                    <th class="col-num">נק'</th>
+                    <th class="col-num">ריב'</th>
+                    <th class="col-num">אס'</th>
+                    <th class="col-num">חט'</th>
+                    <th class="col-num">חס'</th>
+                    <th class="col-num">זריקות מהשדה</th>
+                    <th class="col-num">שלשות</th>
+                    <th class="col-num">קו העונשין</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var stat in Model)
                 {
                     <tr>
-                        <td>@stat.GameDate.ToShortDateString()</td>
-                        <td>
+                        <td class="col-date">@stat.GameDate.ToShortDateString()</td>
+                        <td class="col-team">
                             <div class="team-cell">
-                                <img src="@TeamInfo.GetTeamLogoPath(stat.Team)" alt="@TeamInfo.GetTeamFullName(stat.Team)" class="team-logo" />
-                                @TeamInfo.GetTeamFullName(stat.Team)
+                                <img src="@TeamInfo.GetTeamLogoPath(stat.Team)" alt="@TeamInfo.GetTeamHebrewName(stat.Team)" class="team-logo" />
+                                @TeamInfo.GetTeamHebrewName(stat.Team)
                             </div>
                         </td>
-                        <td>
+                        <td class="col-team">
                             <div class="team-cell">
-                                <img src="@TeamInfo.GetTeamLogoPath(stat.Opponent)" alt="@TeamInfo.GetTeamFullName(stat.Opponent)" class="team-logo" />
-                                @TeamInfo.GetTeamFullName(stat.Opponent)
+                                <img src="@TeamInfo.GetTeamLogoPath(stat.Opponent)" alt="@TeamInfo.GetTeamHebrewName(stat.Opponent)" class="team-logo" />
+                                @TeamInfo.GetTeamHebrewName(stat.Opponent)
                             </div>
                         </td>
-                        <td>@stat.MinutesPlayed.ToString("F1")</td>
-                        <td>@stat.Points</td>
-                        <td>@stat.TotalRebounds</td>
-                        <td>@stat.Assists</td>
-                        <td>@stat.Steals</td>
-                        <td>@stat.Blocks</td>
-                        <td>@stat.FieldGoalsMade/@stat.FieldGoalsAttempted</td>
-                        <td>@stat.ThreePointersMade/@stat.ThreePointersAttempted</td>
-                        <td>@stat.FreeThrowsMade/@stat.FreeThrowsAttempted</td>
+                        <td class="col-num">@stat.MinutesPlayed.ToString("F1")</td>
+                        <td class="col-num">@stat.Points</td>
+                        <td class="col-num">@stat.TotalRebounds</td>
+                        <td class="col-num">@stat.Assists</td>
+                        <td class="col-num">@stat.Steals</td>
+                        <td class="col-num">@stat.Blocks</td>
+                        <td class="col-num">@stat.FieldGoalsMade/@stat.FieldGoalsAttempted</td>
+                        <td class="col-num">@stat.ThreePointersMade/@stat.ThreePointersAttempted</td>
+                        <td class="col-num">@stat.FreeThrowsMade/@stat.FreeThrowsAttempted</td>
                     </tr>
                 }
             </tbody>
@@ -102,65 +102,5 @@
 </div>
 
 @section Styles {
-    <style>
-        .stat-box {
-            text-align: center;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-
-        .stat-label {
-            display: block;
-            font-size: 14px;
-            color: #6c757d;
-        }
-
-        .stat-value {
-            display: block;
-            font-size: 24px;
-            font-weight: bold;
-            color: #212529;
-        }
-
-        .team-cell {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            min-width: 180px;
-            padding: 4px;
-        }
-
-        .team-logo {
-            width: 30px;
-            height: 30px;
-            object-fit: contain;
-            flex-shrink: 0;
-        }
-
-        @@media (max-width: 992px) {
-            .team-cell {
-                min-width: 150px;
-                font-size: 0.9em;
-            }
-        }
-
-        @@media (max-width: 768px) {
-            .table-responsive {
-                max-width: 100%;
-                overflow-x: auto;
-            }
-            
-            .team-cell {
-                min-width: 120px;
-                font-size: 0.85em;
-            }
-
-            .team-logo {
-                width: 24px;
-                height: 24px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="~/css/player-stats.css" asp-append-version="true" />
 }

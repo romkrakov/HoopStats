@@ -1,9 +1,9 @@
 @{
-    ViewData["Title"] = "Import Stats";
+    ViewData["Title"] = "ייבוא נתונים";
 }
 
 <div class="container mt-4">
-    <h2>Import Basketball Stats</h2>
+    <h2>ייבוא נתוני כדורסל</h2>
 
     @if (TempData["Error"] != null)
     {
@@ -18,11 +18,11 @@
                 <div class="card-body">
                     <form asp-action="Import" method="post" enctype="multipart/form-data">
                         <div class="mb-3">
-                            <label class="form-label">Select CSV File</label>
+                            <label class="form-label">בחר קובץ CSV</label>
                             <input type="file" name="file" class="form-control" accept=".csv" required />
                         </div>
-                        <button type="submit" class="btn btn-primary">Import Data</button>
-                        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                        <button type="submit" class="btn btn-primary">ייבא נתונים</button>
+                        <a asp-action="Index" class="btn btn-secondary">חזרה לרשימה</a>
                     </form>
                 </div>
             </div>
@@ -30,22 +30,22 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">CSV Format Requirements</h5>
-                    <p class="card-text">The CSV file should contain the following columns:</p>
+                    <h5 class="card-title">דרישות פורמט CSV</h5>
+                    <p class="card-text">קובץ ה-CSV צריך להכיל את העמודות הבאות:</p>
                     <ul>
-                        <li>Player</li>
-                        <li>Team</li>
-                        <li>Opponent</li>
-                        <li>Result</li>
-                        <li>Minutes Played</li>
-                        <li>Field Goals Made/Attempted</li>
-                        <li>Three Pointers Made/Attempted</li>
-                        <li>Free Throws Made/Attempted</li>
-                        <li>Rebounds (Off/Def)</li>
-                        <li>Assists</li>
-                        <li>Steals</li>
-                        <li>Blocks</li>
-                        <li>Game Score</li>
+                        <li>שחקן (Player)</li>
+                        <li>קבוצה (Team)</li>
+                        <li>יריבה (Opponent)</li>
+                        <li>תוצאה (Result)</li>
+                        <li>דקות משחק (Minutes Played)</li>
+                        <li>קליעות מהשדה - הצלחות/ניסיונות (Field Goals Made/Attempted)</li>
+                        <li>שלשות - הצלחות/ניסיונות (Three Pointers Made/Attempted)</li>
+                        <li>קליעות עונשין - הצלחות/ניסיונות (Free Throws Made/Attempted)</li>
+                        <li>ריבאונדים (התקפה/הגנה) (Rebounds (Off/Def))</li>
+                        <li>אסיסטים (Assists)</li>
+                        <li>חטיפות (Steals)</li>
+                        <li>חסימות (Blocks)</li>
+                        <li>ציון משחק (Game Score)</li>
                     </ul>
                 </div>
             </div>

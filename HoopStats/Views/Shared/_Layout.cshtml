@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="rtl">
 
 <head>
     <meta charset="utf-8" />
@@ -9,6 +9,22 @@
     <link rel="stylesheet" href="~/css/navbar.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/teams.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/HoopStats.styles.css" asp-append-version="true" />
+    <style>
+        /* RTL Support for Hebrew */
+        body {
+            direction: rtl;
+            text-align: right;
+        }
+        .dropdown-menu {
+            text-align: right;
+        }
+        .navbar-nav {
+            padding-right: 0;
+        }
+        th, td {
+            text-align: right;
+        }
+    </style>
     @await RenderSectionAsync("Styles", required: false)
 </head>
 
@@ -26,23 +42,23 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">דף הבית</a>
                         </li>
-                        @if (Context.Session.GetString("Username") != null)
+                        @if (User.Identity?.IsAuthenticated ?? false)
                         {
                             <li class="nav-item dropdown">
                                 <a class="nav-link text-dark dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Stats
+                                    סטטיסטיקות
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" asp-controller="Stats" asp-action="Index">Recent Games</a></li>
-                                    <li><a class="dropdown-item" asp-controller="Stats" asp-action="PlayerStats">Players</a></li>
-                                    <li><a class="dropdown-item" asp-controller="Stats" asp-action="TeamStats">Teams</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Stats" asp-action="Index">תוצאות אחרונות</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Stats" asp-action="PlayerStats">שחקנים</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Stats" asp-action="TeamStats">קבוצות</a></li>
                                 </ul>
                             </li>
                         }
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">פרטיות</a>
                         </li>
                     </ul>
                     <ul class="navbar-nav ml-auto">
@@ -68,6 +84,21 @@
                 </div>
             </div>
         </nav>
+        
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+        
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+        
     </header>
     <div class="container">
         <main role="main" class="pb-3">
@@ -77,21 +108,43 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2024 - HoopStats - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2024 - HoopStats - <a asp-area="" asp-controller="Home" asp-action="Privacy">פרטיות</a>
         </div>
-    </footer>    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    </footer>
+    
+    <!-- Authentication Debug Info (visible only in development) -->
+    @if (System.Diagnostics.Debugger.IsAttached || Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+    {
+        <div class="container mt-4 small text-muted">
+            <div class="row">
+                <div class="col-12">
+                    <h6>Debug Info:</h6>
+                    <p>
+                        IsAuthenticated: @(User.Identity?.IsAuthenticated.ToString() ?? "null")<br />
+                        Username in Session: @(Context.Session.GetString("Username") ?? "null")<br />
+                        UserID in Session: @(Context.Session.GetString("UserId") ?? "null")
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
+    
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
-        // Initialize dropdowns
+        // Wait for DOM to be fully loaded
         document.addEventListener('DOMContentLoaded', function() {
-            var dropdowns = document.querySelectorAll('.dropdown-toggle');
-            dropdowns.forEach(function(dropdown) {
-                dropdown.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    var dropdownMenu = this.nextElementSibling;
-                    dropdownMenu.classList.toggle('show');
-                });
+            // Use Bootstrap's built-in dropdown functionality
+            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+            dropdownElementList.forEach(function (element) {
+                new bootstrap.Dropdown(element);
+            });
+            
+            // Fix any styling issues with RTL layout
+            var dropdownMenus = document.querySelectorAll('.dropdown-menu');
+            dropdownMenus.forEach(function(menu) {
+                menu.classList.add('dropdown-menu-end');
             });
         });
     </script>

@@ -1,25 +1,25 @@
 ﻿@model ErrorViewModel
 @{
-    ViewData["Title"] = "Error";
+    ViewData["Title"] = "שגיאה";
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<h1 class="text-danger">שגיאה.</h1>
+<h2 class="text-danger">אירעה שגיאה בעת עיבוד הבקשה שלך.</h2>
 
 @if (Model.ShowRequestId)
 {
     <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
+        <strong>מזהה בקשה:</strong> <code>@Model.RequestId</code>
     </p>
 }
 
-<h3>Development Mode</h3>
+<h3>מצב פיתוח</h3>
 <p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
+    מעבר לסביבת <strong>פיתוח</strong> יציג מידע מפורט יותר על השגיאה שהתרחשה.
 </p>
 <p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
+    <strong>אין להפעיל את סביבת הפיתוח ביישומים שפורסמו.</strong>
+    הדבר עלול לגרום להצגת מידע רגיש מחריגות למשתמשי קצה.
+    לצורך איתור באגים מקומי, הפעל את סביבת ה<strong>פיתוח</strong> על ידי הגדרת משתנה הסביבה <strong>ASPNETCORE_ENVIRONMENT</strong> ל<strong>Development</strong>
+    והפעלה מחדש של האפליקציה.
 </p>

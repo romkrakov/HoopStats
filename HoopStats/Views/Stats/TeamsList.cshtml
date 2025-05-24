@@ -2,21 +2,21 @@
 @model IEnumerable<HoopStats.Controllers.TeamStatsViewModel>
 
 @{
-    ViewData["Title"] = "NBA Teams";
+    ViewData["Title"] = "קבוצות NBA";
 }
 
 <div class="container mt-4">
-    <h2>NBA Teams Statistics</h2>
+    <h2>סטטיסטיקות קבוצות NBA</h2>
 
     <div class="table-responsive">
         <table class="table table-striped align-middle">
             <thead>
                 <tr>
-                    <th>Team</th>
-                    <th>Games</th>
-                    <th>PPG</th>
-                    <th>Leading Scorer</th>
-                    <th>Scorer PPG</th>
+                    <th>קבוצה</th>
+                    <th>משחקים</th>
+                    <th>נק' למשחק</th>
+                    <th>מוביל קלעים</th>
+                    <th>נק' למשחק</th>
                 </tr>
             </thead>
             <tbody>
@@ -25,14 +25,16 @@
                     <tr>
                         <td>
                             <a asp-action="TeamStats" asp-route-teamName="@team.TeamName" class="team-cell">
-                                <img src="@TeamInfo.GetTeamLogoPath(team.TeamName)" alt="@TeamInfo.GetTeamFullName(team.TeamName)" class="team-logo" />
-                                <span class="team-name">@TeamInfo.GetTeamFullName(team.TeamName)</span>
+                                <img src="@TeamInfo.GetTeamLogoPath(team.TeamName)" alt="@TeamInfo.GetTeamHebrewName(team.TeamName)" class="team-logo" />
+                                <span class="team-name">@TeamInfo.GetTeamHebrewName(team.TeamName)</span>
                             </a>
                         </td>
                         <td>@team.GamesPlayed</td>
                         <td>@team.AveragePoints.ToString("F1")</td>
                         <td>
-                            <a asp-action="PlayerStats" asp-route-playerName="@team.TopScorerName">@team.TopScorerName</a>
+                            <a asp-action="PlayerStats" asp-route-playerName="@team.TopScorerName">
+                                @team.TopScorerName
+                            </a>
                         </td>
                         <td>@team.TopScorerPPG.ToString("F1")</td>
                     </tr>
@@ -42,42 +44,36 @@
     </div>
 </div>
 
-<style>
-    .team-cell {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        text-decoration: none;
-        color: inherit;
-        padding: 4px;
-    }
+@section Styles {
+    <style>
+        .team-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: inherit;
+        }
 
-    .team-cell:hover {
-        text-decoration: none;
-        color: inherit;
-        background-color: rgba(0,0,0,0.05);
-        border-radius: 4px;
-    }
-
-    .team-logo {
-        width: 30px;
-        height: 30px;
-        object-fit: contain;
-        flex-shrink: 0;
-    }
-
-    .team-name {
-        font-size: 14px;
-    }
-
-    @@media (max-width: 768px) {
         .team-logo {
-            width: 24px;
-            height: 24px;
+            width: 30px;
+            height: 30px;
+            object-fit: contain;
         }
-        
+
         .team-name {
-            font-size: 13px;
+            font-weight: 500;
+            font-size: 14px;
         }
-    }
-</style>
+
+        @@media (max-width: 768px) {
+            .team-logo {
+                width: 24px;
+                height: 24px;
+            }
+            
+            .team-name {
+                font-size: 13px;
+            }
+        }
+    </style>
+}

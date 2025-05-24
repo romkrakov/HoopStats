@@ -10,23 +10,52 @@ using System.Linq;
 
 namespace HoopStats.Controllers
 {
-    [Authorize(AuthenticationSchemes = "Cookies")]
+    // Allow non-authenticated users to view but not edit
     public class StatsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<StatsController> _logger;
 
-        public StatsController(ApplicationDbContext context)
+        public StatsController(ApplicationDbContext context, ILogger<StatsController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public IActionResult Index()
         {
-            var stats = _context.GameStats
-                .OrderByDescending(s => s.GameDate)
-                .Take(50)
-                .ToList();
-            return View(stats);
+            try
+            {
+                // For debugging
+                var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+                var username = HttpContext.Session.GetString("Username");
+                
+                _logger.LogInformation($"Stats/Index accessed. Auth: {isAuthenticated}, Username: {username}");
+                
+                var stats = _context.GameStats
+                    .OrderByDescending(s => s.GameDate)
+                    .Take(50)
+                    .ToList();
+
+                // Add check for empty results
+                if (stats == null || stats.Count == 0)
+                {
+                    TempData["ErrorMessage"] = "לא נמצאו נתוני משחקים בבסיס הנתונים";
+                    _logger.LogWarning("No game stats found in database");
+                }
+                else
+                {
+                    _logger.LogInformation($"Found {stats.Count} game stats");
+                }
+
+                return View(stats);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"שגיאה בטעינת נתוני המשחקים: {ex.Message}";
+                _logger.LogError(ex, "Error loading game stats");
+                return RedirectToAction("Index", "Home");
+            }
         }
 
         [HttpGet]

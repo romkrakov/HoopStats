@@ -1,0 +1,86 @@
+/* Player Stats Styles */
+.stat-box {
+    text-align: center;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.stat-label {
+    display: block;
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.stat-value {
+    display: block;
+    font-size: 24px;
+    font-weight: bold;
+    color: #212529;
+}
+
+.container-fluid.stats-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.player-stats-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.col-date {
+    width: 85px;
+}
+
+.col-team {
+    width: 150px;
+}
+
+.col-num {
+    width: 55px;
+    text-align: center;
+}
+
+.table-responsive-xl {
+    overflow-x: visible;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 1200px) {
+    .container-fluid.stats-container {
+        max-width: 100%;
+        padding: 0 10px;
+    }
+    
+    .col-date {
+        width: 80px;
+    }
+    
+    .col-team {
+        width: 140px;
+    }
+    
+    .col-num {
+        width: 50px;
+    }
+}
+
+@media (max-width: 992px) {
+    .team-cell {
+        font-size: 0.9em;
+    }
+}
+
+@media (max-width: 768px) {
+    .team-logo {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .team-cell {
+        font-size: 0.85em;
+    }
+}

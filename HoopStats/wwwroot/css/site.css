@@ -19,10 +19,27 @@ html {
 
 body {
   margin-bottom: 60px;
+  direction: rtl;
+  text-align: right;
 }
+
+/* RTL Support */
+.table th, .table td {
+  text-align: right;
+}
+
+.form-group label {
+  text-align: right;
+  display: block;
+}
+
+.nav {
+  padding-right: 0;
+}
+
 /* Personal CSS */
 .container {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
   direction: rtl;

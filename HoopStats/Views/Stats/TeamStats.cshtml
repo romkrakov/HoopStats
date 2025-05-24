@@ -2,8 +2,8 @@
 @model IEnumerable<HoopStats.Controllers.PlayerStatsViewModel>
 
 @{
-    var teamFullName = TeamInfo.GetTeamFullName(ViewBag.TeamName);
-    ViewData["Title"] = $"{teamFullName} - Team Stats";
+    var teamFullName = TeamInfo.GetTeamHebrewName(ViewBag.TeamName);
+    ViewData["Title"] = $"{teamFullName} - סטטיסטיקות קבוצה";
 }
 
 <div class="container mt-4">
@@ -19,11 +19,11 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Player</th>
-                    <th>Games</th>
-                    <th>PPG</th>
-                    <th>RPG</th>
-                    <th>APG</th>
+                    <th>שחקן</th>
+                    <th>משחקים</th>
+                    <th>נק' למשחק</th>
+                    <th>ריב' למשחק</th>
+                    <th>אס' למשחק</th>
                 </tr>
             </thead>
             <tbody>

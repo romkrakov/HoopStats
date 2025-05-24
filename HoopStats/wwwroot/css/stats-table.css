@@ -1,0 +1,114 @@
+/* Stats Table Styles */
+.stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    table-layout: fixed;
+}
+
+.stats-table th,
+.stats-table td {
+    padding: 6px 4px;
+    text-align: center;
+    border: 1px solid #dee2e6;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.stats-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.stats-table td {
+    font-size: 0.9rem;
+    vertical-align: middle;
+}
+
+/* Column widths */
+.col-date { width: 8%; }
+.col-player { width: 12%; }
+.col-team { width: 15%; }
+.col-minutes, .col-points, .col-rebounds, 
+.col-assists, .col-steals, .col-blocks { 
+    width: 5%; 
+}
+.col-actions { width: 7%; }
+
+/* Team cell styling */
+.team-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: inherit;
+    padding: 2px;
+    gap: 4px;
+    min-width: 0;
+}
+
+.team-cell span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.team-cell:hover {
+    text-decoration: none;
+    color: inherit;
+}
+
+.team-logo-small {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+/* View button styling */
+.btn-info {
+    background-color: #00bcd4;
+    color: white !important;
+    border: none;
+    padding: 2px 8px;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.btn-info:hover {
+    background-color: #0097a7;
+}
+
+/* Links styling */
+.stats-table a {
+    color: #1976d2;
+    text-decoration: none;
+}
+
+.stats-table a:hover {
+    text-decoration: underline;
+}
+
+/* Container styling */
+.container-fluid.mt-4 {
+    max-width: 1800px;  /* Increased from 1400px to 1800px */
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .team-logo-small {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .stats-table th,
+    .stats-table td {
+        padding: 6px;
+        font-size: 0.85rem;
+    }
+}
