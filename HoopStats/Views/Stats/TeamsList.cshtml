@@ -1,0 +1,83 @@
+@using HoopStats.Models
+@model IEnumerable<HoopStats.Controllers.TeamStatsViewModel>
+
+@{
+    ViewData["Title"] = "NBA Teams";
+}
+
+<div class="container mt-4">
+    <h2>NBA Teams Statistics</h2>
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Team</th>
+                    <th>Games</th>
+                    <th>PPG</th>
+                    <th>Leading Scorer</th>
+                    <th>Scorer PPG</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var team in Model)
+                {
+                    <tr>
+                        <td>
+                            <a asp-action="TeamStats" asp-route-teamName="@team.TeamName" class="team-cell">
+                                <img src="@TeamInfo.GetTeamLogoPath(team.TeamName)" alt="@TeamInfo.GetTeamFullName(team.TeamName)" class="team-logo" />
+                                <span class="team-name">@TeamInfo.GetTeamFullName(team.TeamName)</span>
+                            </a>
+                        </td>
+                        <td>@team.GamesPlayed</td>
+                        <td>@team.AveragePoints.ToString("F1")</td>
+                        <td>
+                            <a asp-action="PlayerStats" asp-route-playerName="@team.TopScorerName">@team.TopScorerName</a>
+                        </td>
+                        <td>@team.TopScorerPPG.ToString("F1")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .team-cell {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        color: inherit;
+        padding: 4px;
+    }
+
+    .team-cell:hover {
+        text-decoration: none;
+        color: inherit;
+        background-color: rgba(0,0,0,0.05);
+        border-radius: 4px;
+    }
+
+    .team-logo {
+        width: 30px;
+        height: 30px;
+        object-fit: contain;
+        flex-shrink: 0;
+    }
+
+    .team-name {
+        font-size: 14px;
+    }
+
+    @@media (max-width: 768px) {
+        .team-logo {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .team-name {
+            font-size: 13px;
+        }
+    }
+</style>

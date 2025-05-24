@@ -1,0 +1,33 @@
+.dropdown-menu {
+    display: none;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.nav-item.dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Ensure dropdown is positioned correctly */
+.nav-item.dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    min-width: 10rem;
+    padding: 0.5rem 0;
+    margin: 0.125rem 0 0;
+    background-color: #fff;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 0.25rem;
+}

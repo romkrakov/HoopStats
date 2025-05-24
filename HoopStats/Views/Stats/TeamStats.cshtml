@@ -1,0 +1,45 @@
+@using HoopStats.Models
+@model IEnumerable<HoopStats.Controllers.PlayerStatsViewModel>
+
+@{
+    var teamFullName = TeamInfo.GetTeamFullName(ViewBag.TeamName);
+    ViewData["Title"] = $"{teamFullName} - Team Stats";
+}
+
+<div class="container mt-4">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <img src="@TeamInfo.GetTeamLogoPath(ViewBag.TeamName)" alt="@teamFullName" class="team-logo" style="width: 60px; height: 60px;" />
+        <div>
+            <h2 class="mb-0">@teamFullName</h2>
+            <p class="mb-0 text-muted">@ViewBag.TeamName</p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Games</th>
+                    <th>PPG</th>
+                    <th>RPG</th>
+                    <th>APG</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var player in Model)
+                {
+                    <tr>
+                        <td>
+                            <a asp-action="PlayerStats" asp-route-playerName="@player.PlayerName">@player.PlayerName</a>
+                        </td>
+                        <td>@player.GamesPlayed</td>
+                        <td>@player.AveragePoints.ToString("F1")</td>
+                        <td>@player.AverageRebounds.ToString("F1")</td>
+                        <td>@player.AverageAssists.ToString("F1")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

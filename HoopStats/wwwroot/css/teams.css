@@ -1,0 +1,37 @@
+.team-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: inherit;
+    padding: 4px;
+}
+
+.team-cell:hover {
+    text-decoration: none;
+    color: inherit;
+    background-color: rgba(0,0,0,0.05);
+    border-radius: 4px;
+}
+
+.team-logo {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.team-name {
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .team-logo {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .team-name {
+        font-size: 13px;
+    }
+}

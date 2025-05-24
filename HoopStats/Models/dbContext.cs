@@ -1,4 +1,3 @@
-
 using Microsoft.EntityFrameworkCore;
 
 
@@ -20,6 +19,7 @@ namespace HoopStats.Models
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<GameStats> GameStats { get; set; }
 
 
         // Add DbSet properties for your entities here

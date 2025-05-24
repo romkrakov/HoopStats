@@ -1,0 +1,54 @@
+@{
+    ViewData["Title"] = "Import Stats";
+}
+
+<div class="container mt-4">
+    <h2>Import Basketball Stats</h2>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <form asp-action="Import" method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label">Select CSV File</label>
+                            <input type="file" name="file" class="form-control" accept=".csv" required />
+                        </div>
+                        <button type="submit" class="btn btn-primary">Import Data</button>
+                        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">CSV Format Requirements</h5>
+                    <p class="card-text">The CSV file should contain the following columns:</p>
+                    <ul>
+                        <li>Player</li>
+                        <li>Team</li>
+                        <li>Opponent</li>
+                        <li>Result</li>
+                        <li>Minutes Played</li>
+                        <li>Field Goals Made/Attempted</li>
+                        <li>Three Pointers Made/Attempted</li>
+                        <li>Free Throws Made/Attempted</li>
+                        <li>Rebounds (Off/Def)</li>
+                        <li>Assists</li>
+                        <li>Steals</li>
+                        <li>Blocks</li>
+                        <li>Game Score</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

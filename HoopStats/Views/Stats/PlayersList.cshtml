@@ -1,0 +1,43 @@
+@model IEnumerable<HoopStats.Controllers.PlayerStatsViewModel>
+
+@{
+    ViewData["Title"] = "NBA Top Players";
+}
+
+<div class="container mt-4">
+    <h2>NBA Top Players</h2>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Games</th>
+                    <th>PPG</th>
+                    <th>RPG</th>
+                    <th>APG</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int rank = 1;
+                    foreach (var player in Model)
+                    {
+                        <tr>
+                            <td>@rank</td>
+                            <td>
+                                <a asp-action="PlayerStats" asp-route-playerName="@player.PlayerName">@player.PlayerName</a>
+                            </td>
+                            <td>@player.GamesPlayed</td>
+                            <td>@player.AveragePoints.ToString("F1")</td>
+                            <td>@player.AverageRebounds.ToString("F1")</td>
+                            <td>@player.AverageAssists.ToString("F1")</td>
+                        </tr>
+                        rank++;
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

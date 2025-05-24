@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using HoopStats.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
-using System.Text.Json;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace HoopStats.Controllers;
 
@@ -29,10 +31,14 @@ public class HomeController : Controller
     }
     public IActionResult Login()
     {
+        if (User.Identity?.IsAuthenticated ?? false)
+        {
+            return RedirectToAction("Index");
+        }
         return View();
     }
     [HttpPost]
-    public IActionResult Login(LoginViewModel model)
+    public async Task<IActionResult> Login(LoginViewModel model)
     {
         if (ModelState.IsValid)
         {
@@ -42,9 +48,26 @@ public class HomeController : Controller
 
             if (user != null)
             {
-                // Store user info in session
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.Role, "User")
+                };
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var principal = new ClaimsPrincipal(claimsIdentity);
+
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
+                    new AuthenticationProperties
+                    {
+                        IsPersistent = true,
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
+                    });
+
                 HttpContext.Session.SetString("UserId", user.Id.ToString());
                 HttpContext.Session.SetString("Username", user.Username);
+                
                 TempData["Action"] = "Login";
                 return RedirectToAction("ThankYou", new { id = user.Id });
             }
@@ -59,7 +82,7 @@ public class HomeController : Controller
         return View();
     }
     [HttpPost]
-    public IActionResult Register(RegisterViewModel model)
+    public async Task<IActionResult> Register(RegisterViewModel model)
     {
         if (ModelState.IsValid)
         {
@@ -76,13 +99,32 @@ public class HomeController : Controller
                 };
 
                 _context.Users.Add(user);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
+
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.Role, "User")
+                };
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var principal = new ClaimsPrincipal(claimsIdentity);
+
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
+                    new AuthenticationProperties
+                    {
+                        IsPersistent = true,
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
+                    });
+
                 HttpContext.Session.SetString("UserId", user.Id.ToString());
                 HttpContext.Session.SetString("Username", user.Username);
+                
                 TempData["Action"] = "Register";
                 return RedirectToAction("ThankYou", new { id = user.Id });
             }
-            catch (DbUpdateException ex)
+            catch (DbUpdateException)
             {
                 ModelState.AddModelError("", "שם המשתמש או כתובת האימייל כבר קיימים במערכת");
             }
@@ -100,8 +142,9 @@ public class HomeController : Controller
         return View(user);
     }
 
-    public IActionResult Logout()
+    public async Task<IActionResult> Logout()
     {
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         HttpContext.Session.Clear();
         return RedirectToAction("Index");
     }
