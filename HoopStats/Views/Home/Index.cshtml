@@ -5,4 +5,41 @@
 <div class="text-center">
     <h1 class="display-4">ברוכים הבאים ל-HoopStats</h1>
     <img src="/logo.png" class="mt-4 img-fluid" alt="לוגו HoopStats">
+    
+    @if (User.Identity?.IsAuthenticated ?? false)
+    {
+        <div class="mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h3>תוצאות משחקים אחרונים</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="lead">צפה בתוצאות המשחקים האחרונים בליגה</p>
+                            <a asp-controller="Stats" asp-action="LatestGames" class="btn btn-primary btn-lg">תוצאות המשחקים</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h3>התחבר כדי לצפות בתוצאות</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="lead">התחבר למערכת כדי לצפות בתוצאות המשחקים האחרונים בליגה</p>
+                            <a asp-controller="Home" asp-action="Login" class="btn btn-primary btn-lg">התחברות</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 </div>

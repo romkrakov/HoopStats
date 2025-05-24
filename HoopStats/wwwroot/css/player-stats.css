@@ -48,6 +48,19 @@
     overflow-x: visible;
 }
 
+/* Game date link styles */
+.game-date-link {
+    text-decoration: none;
+    color: #0066cc;
+    transition: color 0.2s ease;
+}
+
+.game-date-link:hover {
+    text-decoration: underline;
+    cursor: pointer;
+    color: #004499;
+}
+
 /* Media queries for responsive design */
 @media (max-width: 1200px) {
     .container-fluid.stats-container {

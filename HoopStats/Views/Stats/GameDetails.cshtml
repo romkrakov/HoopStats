@@ -1,0 +1,844 @@
+@model HoopStats.Models.GameDetailsViewModel
+@using HoopStats.Models
+
+@{
+    ViewData["Title"] = $"פרטי משחק - {TeamInfo.GetTeamHebrewName(Model.Team1)} נגד {TeamInfo.GetTeamHebrewName(Model.Team2)}";
+    
+    // Calculate team totals and percentages for comparison
+    var team1TotalRebounds = Model.Team1Players.Sum(p => p.Rebounds);
+    var team2TotalRebounds = Model.Team2Players.Sum(p => p.Rebounds);
+    
+    var team1TotalAssists = Model.Team1Players.Sum(p => p.Assists);
+    var team2TotalAssists = Model.Team2Players.Sum(p => p.Assists);
+    
+    var team1TotalSteals = Model.Team1Players.Sum(p => p.Steals);
+    var team2TotalSteals = Model.Team2Players.Sum(p => p.Steals);
+    
+    var team1TotalBlocks = Model.Team1Players.Sum(p => p.Blocks);
+    var team2TotalBlocks = Model.Team2Players.Sum(p => p.Blocks);
+    
+    var team1TotalTurnovers = Model.Team1Players.Sum(p => p.Turnovers);
+    var team2TotalTurnovers = Model.Team2Players.Sum(p => p.Turnovers);
+    
+    // Find top performers
+    var topScorer = Model.Team1Players.Concat(Model.Team2Players)
+        .OrderByDescending(p => p.Points)
+        .FirstOrDefault();
+        
+    var topRebounder = Model.Team1Players.Concat(Model.Team2Players)
+        .OrderByDescending(p => p.Rebounds)
+        .FirstOrDefault();
+        
+    var topAssister = Model.Team1Players.Concat(Model.Team2Players)
+        .OrderByDescending(p => p.Assists)
+        .FirstOrDefault();
+    
+    // Define performance thresholds
+    Func<int, string> getPointsClass = points => 
+        points >= 30 ? "excellent-stat" : 
+        points >= 20 ? "good-stat" : 
+        points >= 10 ? "average-stat" : "";
+        
+    Func<int, string> getReboundsClass = rebounds => 
+        rebounds >= 15 ? "excellent-stat" : 
+        rebounds >= 10 ? "good-stat" : 
+        rebounds >= 5 ? "average-stat" : "";
+        
+    Func<int, string> getAssistsClass = assists => 
+        assists >= 10 ? "excellent-stat" : 
+        assists >= 7 ? "good-stat" : 
+        assists >= 5 ? "average-stat" : "";
+        
+    Func<int, string> getStealsBlocksClass = stat => 
+        stat >= 5 ? "excellent-stat" : 
+        stat >= 3 ? "good-stat" : 
+        stat >= 1 ? "average-stat" : "";
+        
+    Func<double, string> getShootingClass = pct => 
+        pct >= 0.6 ? "excellent-stat" : 
+        pct >= 0.5 ? "good-stat" : 
+        pct >= 0.4 ? "average-stat" : "";
+}
+
+<div class="container-fluid mt-4 px-4">
+    <h2 class="mb-4">פרטי משחק - @Model.GameDate.ToString("dd/MM/yyyy")</h2>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <div class="row align-items-center">
+                        <div class="col-4 text-center">
+                            <img src="@TeamInfo.GetTeamLogoPath(Model.Team1)" alt="@TeamInfo.GetTeamHebrewName(Model.Team1)" class="team-logo-medium" />
+                            <h4>@TeamInfo.GetTeamHebrewName(Model.Team1)</h4>
+                        </div>
+                        <div class="col-4 text-center">
+                            <h2 class="game-score">@Model.Team1Score - @Model.Team2Score</h2>
+                            <p class="mt-2">
+                                <span class="badge @(Model.Winner == Model.Team1 ? "bg-success" : "bg-secondary")">
+                                    @(Model.Winner == Model.Team1 ? "ניצחון" : "הפסד")
+                                </span>
+                                <span class="mx-2">vs</span>
+                                <span class="badge @(Model.Winner == Model.Team2 ? "bg-success" : "bg-secondary")">
+                                    @(Model.Winner == Model.Team2 ? "ניצחון" : "הפסד")
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-4 text-center">
+                            <img src="@TeamInfo.GetTeamLogoPath(Model.Team2)" alt="@TeamInfo.GetTeamHebrewName(Model.Team2)" class="team-logo-medium" />
+                            <h4>@TeamInfo.GetTeamHebrewName(Model.Team2)</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h4>סטטיסטיקות שחקנים - @TeamInfo.GetTeamHebrewName(Model.Team1)</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered stats-table">
+                            <thead>
+                                <tr>
+                                    <th>שחקן</th>
+                                    <th>דק'</th>
+                                    <th>נק'</th>
+                                    <th>ריב'</th>
+                                    <th>אס'</th>
+                                    <th>חט'</th>
+                                    <th>חס'</th>
+                                    <th>זריקות מהשדה</th>
+                                    <th>שלשות</th>
+                                    <th>קו העונשין</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var player in Model.Team1Players)
+                                {
+                                    <tr>
+                                        <td>
+                                            <a asp-action="PlayerStats" asp-route-playerName="@player.PlayerName">
+                                                @player.PlayerName
+                                            </a>
+                                        </td>
+                                        <td>@player.MinutesPlayed.ToString("F1")</td>
+                                        <td class="@getPointsClass(player.Points)">@player.Points</td>
+                                        <td class="@getReboundsClass(player.Rebounds)">@player.Rebounds</td>
+                                        <td class="@getAssistsClass(player.Assists)">@player.Assists</td>
+                                        <td class="@getStealsBlocksClass(player.Steals)">@player.Steals</td>
+                                        <td class="@getStealsBlocksClass(player.Blocks)">@player.Blocks</td>
+                                        <td class="@getShootingClass(player.FGP)">@player.FGM-@player.FGA (@player.FGP.ToString("P1"))</td>
+                                        <td>@player.TPM-@player.TPA (@player.TPP.ToString("P1"))</td>
+                                        <td>@player.FTM-@player.FTA (@player.FTP.ToString("P1"))</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h4>סטטיסטיקות שחקנים - @TeamInfo.GetTeamHebrewName(Model.Team2)</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered stats-table">
+                            <thead>
+                                <tr>
+                                    <th>שחקן</th>
+                                    <th>דק'</th>
+                                    <th>נק'</th>
+                                    <th>ריב'</th>
+                                    <th>אס'</th>
+                                    <th>חט'</th>
+                                    <th>חס'</th>
+                                    <th>זריקות מהשדה</th>
+                                    <th>שלשות</th>
+                                    <th>קו העונשין</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var player in Model.Team2Players)
+                                {
+                                    <tr>
+                                        <td>
+                                            <a asp-action="PlayerStats" asp-route-playerName="@player.PlayerName">
+                                                @player.PlayerName
+                                            </a>
+                                        </td>
+                                        <td>@player.MinutesPlayed.ToString("F1")</td>
+                                        <td class="@getPointsClass(player.Points)">@player.Points</td>
+                                        <td class="@getReboundsClass(player.Rebounds)">@player.Rebounds</td>
+                                        <td class="@getAssistsClass(player.Assists)">@player.Assists</td>
+                                        <td class="@getStealsBlocksClass(player.Steals)">@player.Steals</td>
+                                        <td class="@getStealsBlocksClass(player.Blocks)">@player.Blocks</td>
+                                        <td class="@getShootingClass(player.FGP)">@player.FGM-@player.FGA (@player.FGP.ToString("P1"))</td>
+                                        <td>@player.TPM-@player.TPA (@player.TPP.ToString("P1"))</td>
+                                        <td>@player.FTM-@player.FTA (@player.FTP.ToString("P1"))</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <!-- Add a legend for the performance indicators -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="text-center mb-3">מקרא לביצועים</h5>
+                    <div class="stat-legend">
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: rgba(40, 167, 69, 0.1); border: 1px solid #28a745;"></span>
+                            <span>מצוין (נק': 30+, ריב': 15+, אס': 10+, חט'/חס': 5+, אחוזים: 60%+)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: rgba(0, 123, 255, 0.1); border: 1px solid #007bff;"></span>
+                            <span>טוב (נק': 20+, ריב': 10+, אס': 7+, חט'/חס': 3+, אחוזים: 50%+)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: transparent; border: 1px solid #6c757d;"></span>
+                            <span>ממוצע (נק': 10+, ריב': 5+, אס': 5+, חט'/חס': 1+, אחוזים: 40%+)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h4>סטטיסטיקות מתקדמות</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>@TeamInfo.GetTeamHebrewName(Model.Team1)</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th>ריבאונדים התקפה</th>
+                                    <td>@Model.Team1Players.Sum(p => p.OffRebounds)</td>
+                                </tr>
+                                <tr>
+                                    <th>ריבאונדים הגנה</th>
+                                    <td>@Model.Team1Players.Sum(p => p.DefRebounds)</td>
+                                </tr>
+                                <tr>
+                                    <th>איבודים</th>
+                                    <td>@Model.Team1Players.Sum(p => p.Turnovers)</td>
+                                </tr>
+                                <tr>
+                                    <th>עבירות</th>
+                                    <td>@Model.Team1Players.Sum(p => p.Fouls)</td>
+                                </tr>
+                                <tr>
+                                    <th>אחוזי זריקה מהשדה</th>
+                                    <td>
+                                        @{
+                                            var team1FGA = Model.Team1Players.Sum(p => p.FGA);
+                                            var team1FGM = Model.Team1Players.Sum(p => p.FGM);
+                                            var team1FGP = team1FGA > 0 ? (double)team1FGM / team1FGA : 0;
+                                        }
+                                        @team1FGM-@team1FGA (@team1FGP.ToString("P1"))
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>אחוזי זריקה לשלוש</th>
+                                    <td>
+                                        @{
+                                            var team1TPA = Model.Team1Players.Sum(p => p.TPA);
+                                            var team1TPM = Model.Team1Players.Sum(p => p.TPM);
+                                            var team1TPP = team1TPA > 0 ? (double)team1TPM / team1TPA : 0;
+                                        }
+                                        @team1TPM-@team1TPA (@team1TPP.ToString("P1"))
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>@TeamInfo.GetTeamHebrewName(Model.Team2)</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th>ריבאונדים התקפה</th>
+                                    <td>@Model.Team2Players.Sum(p => p.OffRebounds)</td>
+                                </tr>
+                                <tr>
+                                    <th>ריבאונדים הגנה</th>
+                                    <td>@Model.Team2Players.Sum(p => p.DefRebounds)</td>
+                                </tr>
+                                <tr>
+                                    <th>איבודים</th>
+                                    <td>@Model.Team2Players.Sum(p => p.Turnovers)</td>
+                                </tr>
+                                <tr>
+                                    <th>עבירות</th>
+                                    <td>@Model.Team2Players.Sum(p => p.Fouls)</td>
+                                </tr>
+                                <tr>
+                                    <th>אחוזי זריקה מהשדה</th>
+                                    <td>
+                                        @{
+                                            var team2FGA = Model.Team2Players.Sum(p => p.FGA);
+                                            var team2FGM = Model.Team2Players.Sum(p => p.FGM);
+                                            var team2FGP = team2FGA > 0 ? (double)team2FGM / team2FGA : 0;
+                                        }
+                                        @team2FGM-@team2FGA (@team2FGP.ToString("P1"))
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>אחוזי זריקה לשלוש</th>
+                                    <td>
+                                        @{
+                                            var team2TPA = Model.Team2Players.Sum(p => p.TPA);
+                                            var team2TPM = Model.Team2Players.Sum(p => p.TPM);
+                                            var team2TPP = team2TPA > 0 ? (double)team2TPM / team2TPA : 0;
+                                        }
+                                        @team2TPM-@team2TPA (@team2TPP.ToString("P1"))
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New section: Team Comparison and Top Performers -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h4>השוואת קבוצות</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="teamComparisonChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h4>מצטייני המשחק</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="top-performer-card">
+                                <h5>מלך הנקודות</h5>
+                                @if (topScorer != null)
+                                {
+                                    <p class="top-performer-name">
+                                        <a asp-action="PlayerStats" asp-route-playerName="@topScorer.PlayerName">
+                                            @topScorer.PlayerName
+                                        </a>
+                                    </p>
+                                    <p class="top-performer-stat">@topScorer.Points</p>
+                                    <p class="top-performer-team">
+                                        @TeamInfo.GetTeamHebrewName(topScorer.PlayerName == Model.Team1Players.FirstOrDefault()?.PlayerName ? Model.Team1 : Model.Team2)
+                                    </p>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="top-performer-card">
+                                <h5>מלך הריבאונדים</h5>
+                                @if (topRebounder != null)
+                                {
+                                    <p class="top-performer-name">
+                                        <a asp-action="PlayerStats" asp-route-playerName="@topRebounder.PlayerName">
+                                            @topRebounder.PlayerName
+                                        </a>
+                                    </p>
+                                    <p class="top-performer-stat">@topRebounder.Rebounds</p>
+                                    <p class="top-performer-team">
+                                        @TeamInfo.GetTeamHebrewName(topRebounder.PlayerName == Model.Team1Players.FirstOrDefault()?.PlayerName ? Model.Team1 : Model.Team2)
+                                    </p>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="top-performer-card">
+                                <h5>מלך האסיסטים</h5>
+                                @if (topAssister != null)
+                                {
+                                    <p class="top-performer-name">
+                                        <a asp-action="PlayerStats" asp-route-playerName="@topAssister.PlayerName">
+                                            @topAssister.PlayerName
+                                        </a>
+                                    </p>
+                                    <p class="top-performer-stat">@topAssister.Assists</p>
+                                    <p class="top-performer-team">
+                                        @TeamInfo.GetTeamHebrewName(topAssister.PlayerName == Model.Team1Players.FirstOrDefault()?.PlayerName ? Model.Team1 : Model.Team2)
+                                    </p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notable achievements section -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h4>הישגים בולטים במשחק</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-center mb-3">@TeamInfo.GetTeamHebrewName(Model.Team1)</h5>
+                            <ul class="achievement-list">
+                                @{
+                                    bool team1HasAchievements = false;
+                                    
+                                    foreach (var player in Model.Team1Players)
+                                    {
+                                        if (player.Points >= 30)
+                                        {
+                                            team1HasAchievements = true;
+                                            <li class="achievement-item">
+                                                <span class="achievement-player">@player.PlayerName</span> קלע <span class="achievement-stat">@player.Points</span> נקודות
+                                            </li>
+                                        }
+                                        
+                                        if (player.Rebounds >= 15)
+                                        {
+                                            team1HasAchievements = true;
+                                            <li class="achievement-item">
+                                                <span class="achievement-player">@player.PlayerName</span> לקח <span class="achievement-stat">@player.Rebounds</span> ריבאונדים
+                                            </li>
+                                        }
+                                        
+                                        if (player.Assists >= 10)
+                                        {
+                                            team1HasAchievements = true;
+                                            <li class="achievement-item">
+                                                <span class="achievement-player">@player.PlayerName</span> מסר <span class="achievement-stat">@player.Assists</span> אסיסטים
+                                            </li>
+                                        }
+                                        
+                                        if (player.Points >= 10 && player.Rebounds >= 10 && player.Assists >= 10)
+                                        {
+                                            team1HasAchievements = true;
+                                            <li class="achievement-item">
+                                                <span class="achievement-player">@player.PlayerName</span> השיג <span class="achievement-stat">טריפל דאבל</span>
+                                                (@player.Points נק', @player.Rebounds ריב', @player.Assists אס')
+                                            </li>
+                                        }
+                                        else if (player.Points >= 10 && player.Rebounds >= 10)
+                                        {
+                                            team1HasAchievements = true;
+                                            <li class="achievement-item">
+                                                <span class="achievement-player">@player.PlayerName</span> השיג <span class="achievement-stat">דאבל-דאבל</span>
+                                                (@player.Points נק', @player.Rebounds ריב')
+                                            </li>
+                                        }
+                                        else if (player.Points >= 10 && player.Assists >= 10)
+                                        {
+                                            team1HasAchievements = true;
+                                            <li class="achievement-item">
+                                                <span class="achievement-player">@player.PlayerName</span> השיג <span class="achievement-stat">דאבל-דאבל</span>
+                                                (@player.Points נק', @player.Assists אס')
+                                            </li>
+                                        }
+                                    }
+                                    
+                                    if (!team1HasAchievements)
+                                    {
+                                        <li class="no-achievements">לא נרשמו הישגים מיוחדים</li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-center mb-3">@TeamInfo.GetTeamHebrewName(Model.Team2)</h5>
+                            <ul class="achievement-list">
+                                @{
+                                    bool team2HasAchievements = false;
+                                    
+                                    foreach (var player in Model.Team2Players)
+                                    {
+                                        if (player.Points >= 30)
+                                        {
+                                            team2HasAchievements = true;
+                                            <li class="achievement-item">
+                                                <span class="achievement-player">@player.PlayerName</span> קלע <span class="achievement-stat">@player.Points</span> נקודות
+                                            </li>
+                                        }
+                                        
+                                        if (player.Rebounds >= 15)
+                                        {
+                                            team2HasAchievements = true;
+                                            <li class="achievement-item">
+                                                <span class="achievement-player">@player.PlayerName</span> לקח <span class="achievement-stat">@player.Rebounds</span> ריבאונדים
+                                            </li>
+                                        }
+                                        
+                                        if (player.Assists >= 10)
+                                        {
+                                            team2HasAchievements = true;
+                                            <li class="achievement-item">
+                                                <span class="achievement-player">@player.PlayerName</span> מסר <span class="achievement-stat">@player.Assists</span> אסיסטים
+                                            </li>
+                                        }
+                                        
+                                        if (player.Points >= 10 && player.Rebounds >= 10 && player.Assists >= 10)
+                                        {
+                                            team2HasAchievements = true;
+                                            <li class="achievement-item">
+                                                <span class="achievement-player">@player.PlayerName</span> השיג <span class="achievement-stat">טריפל דאבל</span>
+                                                (@player.Points נק', @player.Rebounds ריב', @player.Assists אס')
+                                            </li>
+                                        }
+                                        else if (player.Points >= 10 && player.Rebounds >= 10)
+                                        {
+                                            team2HasAchievements = true;
+                                            <li class="achievement-item">
+                                                <span class="achievement-player">@player.PlayerName</span> השיג <span class="achievement-stat">דאבל-דאבל</span>
+                                                (@player.Points נק', @player.Rebounds ריב')
+                                            </li>
+                                        }
+                                        else if (player.Points >= 10 && player.Assists >= 10)
+                                        {
+                                            team2HasAchievements = true;
+                                            <li class="achievement-item">
+                                                <span class="achievement-player">@player.PlayerName</span> השיג <span class="achievement-stat">דאבל-דאבל</span>
+                                                (@player.Points נק', @player.Assists אס')
+                                            </li>
+                                        }
+                                    }
+                                    
+                                    if (!team2HasAchievements)
+                                    {
+                                        <li class="no-achievements">לא נרשמו הישגים מיוחדים</li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Efficiency Metrics Section -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h4>מדדי יעילות מתקדמים</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="efficiencyTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="team1-tab" data-bs-toggle="tab" data-bs-target="#team1-efficiency" type="button" role="tab" aria-controls="team1-efficiency" aria-selected="true">
+                                @TeamInfo.GetTeamHebrewName(Model.Team1)
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="team2-tab" data-bs-toggle="tab" data-bs-target="#team2-efficiency" type="button" role="tab" aria-controls="team2-efficiency" aria-selected="false">
+                                @TeamInfo.GetTeamHebrewName(Model.Team2)
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="efficiencyTabsContent">
+                        <div class="tab-pane fade show active" id="team1-efficiency" role="tabpanel" aria-labelledby="team1-tab">
+                            <div class="table-responsive mt-3">
+                                <table class="table table-striped table-bordered stats-table">
+                                    <thead>
+                                        <tr>
+                                            <th>שחקן</th>
+                                            <th>דירוג יעילות</th>
+                                            <th>אחוזי קליעה אמיתיים</th>
+                                            <th>יחס אסיסטים/איבודים</th>
+                                            <th>נקודות לדקה</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var player in Model.Team1Players.OrderByDescending(p => p.EfficiencyRating))
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <a asp-action="PlayerStats" asp-route-playerName="@player.PlayerName">
+                                                        @player.PlayerName
+                                                    </a>
+                                                </td>
+                                                <td class="@(player.EfficiencyRating >= 25 ? "excellent-stat" : player.EfficiencyRating >= 15 ? "good-stat" : player.EfficiencyRating >= 5 ? "average-stat" : "")">
+                                                    @player.EfficiencyRating.ToString("F1")
+                                                </td>
+                                                <td class="@(player.TrueShootingPercentage >= 0.65 ? "excellent-stat" : player.TrueShootingPercentage >= 0.55 ? "good-stat" : player.TrueShootingPercentage >= 0.45 ? "average-stat" : "")">
+                                                    @player.TrueShootingPercentage.ToString("P1")
+                                                </td>
+                                                <td class="@(player.AssistToTurnoverRatio >= 4 ? "excellent-stat" : player.AssistToTurnoverRatio >= 2.5 ? "good-stat" : player.AssistToTurnoverRatio >= 1.5 ? "average-stat" : "")">
+                                                    @player.AssistToTurnoverRatio.ToString("F1")
+                                                </td>
+                                                <td class="@(player.PointsPerMinute >= 1.0 ? "excellent-stat" : player.PointsPerMinute >= 0.7 ? "good-stat" : player.PointsPerMinute >= 0.4 ? "average-stat" : "")">
+                                                    @player.PointsPerMinute.ToString("F2")
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="team2-efficiency" role="tabpanel" aria-labelledby="team2-tab">
+                            <div class="table-responsive mt-3">
+                                <table class="table table-striped table-bordered stats-table">
+                                    <thead>
+                                        <tr>
+                                            <th>שחקן</th>
+                                            <th>דירוג יעילות</th>
+                                            <th>אחוזי קליעה אמיתיים</th>
+                                            <th>יחס אסיסטים/איבודים</th>
+                                            <th>נקודות לדקה</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var player in Model.Team2Players.OrderByDescending(p => p.EfficiencyRating))
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <a asp-action="PlayerStats" asp-route-playerName="@player.PlayerName">
+                                                        @player.PlayerName
+                                                    </a>
+                                                </td>
+                                                <td class="@(player.EfficiencyRating >= 25 ? "excellent-stat" : player.EfficiencyRating >= 15 ? "good-stat" : player.EfficiencyRating >= 5 ? "average-stat" : "")">
+                                                    @player.EfficiencyRating.ToString("F1")
+                                                </td>
+                                                <td class="@(player.TrueShootingPercentage >= 0.65 ? "excellent-stat" : player.TrueShootingPercentage >= 0.55 ? "good-stat" : player.TrueShootingPercentage >= 0.45 ? "average-stat" : "")">
+                                                    @player.TrueShootingPercentage.ToString("P1")
+                                                </td>
+                                                <td class="@(player.AssistToTurnoverRatio >= 4 ? "excellent-stat" : player.AssistToTurnoverRatio >= 2.5 ? "good-stat" : player.AssistToTurnoverRatio >= 1.5 ? "average-stat" : "")">
+                                                    @player.AssistToTurnoverRatio.ToString("F1")
+                                                </td>
+                                                <td class="@(player.PointsPerMinute >= 1.0 ? "excellent-stat" : player.PointsPerMinute >= 0.7 ? "good-stat" : player.PointsPerMinute >= 0.4 ? "average-stat" : "")">
+                                                    @player.PointsPerMinute.ToString("F2")
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Efficiency metrics explanation -->
+                    <div class="mt-4">
+                        <h5>הסבר על מדדי היעילות:</h5>
+                        <ul class="efficiency-explanation">
+                            <li><strong>דירוג יעילות:</strong> מדד כולל המחשב את התרומה של השחקן למשחק. חישוב: (נקודות + ריבאונדים + אסיסטים + חטיפות + חסימות) - (זריקות שהוחטאו + עונשין שהוחטאו + איבודים)</li>
+                            <li><strong>אחוזי קליעה אמיתיים (TS%):</strong> מדד המשקלל את היעילות בקליעה מכל הטווחים. חישוב: נקודות / (2 * (זריקות מהשדה + 0.44 * זריקות עונשין))</li>
+                            <li><strong>יחס אסיסטים/איבודים:</strong> כמה אסיסטים השחקן מחלק עבור כל איבוד. ככל שהמספר גבוה יותר, כך השחקן יעיל יותר בשמירה על הכדור.</li>
+                            <li><strong>נקודות לדקה:</strong> כמה נקודות השחקן קולע בממוצע לכל דקת משחק. מדד טוב להשוואה בין שחקנים עם זמן משחק שונה.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .team-logo-medium {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+    }
+    
+    .game-score {
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+    
+    .stats-table {
+        font-size: 0.9rem;
+    }
+    
+    th {
+        text-align: center;
+    }
+    
+    td {
+        text-align: center;
+    }
+    
+    .top-performer-card {
+        padding: 15px;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        height: 100%;
+    }
+    
+    .top-performer-name {
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+    }
+    
+    .top-performer-stat {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 5px;
+    }
+    
+    .top-performer-team {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    /* Performance indicators */
+    .excellent-stat {
+        font-weight: bold;
+        color: #28a745;
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+    
+    .good-stat {
+        font-weight: bold;
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+    
+    .average-stat {
+        color: #6c757d;
+    }
+    
+    /* Add legend for performance indicators */
+    .stat-legend {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 15px;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        font-size: 0.8rem;
+    }
+    
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        margin-right: 5px;
+        display: inline-block;
+    }
+    
+    /* Achievement list styles */
+    .achievement-list {
+        list-style-type: none;
+        padding: 0;
+    }
+    
+    .achievement-item {
+        padding: 8px 12px;
+        margin-bottom: 8px;
+        background-color: #f8f9fa;
+        border-radius: 6px;
+        border-right: 4px solid #007bff;
+        position: relative;
+    }
+    
+    .achievement-player {
+        font-weight: bold;
+        color: #495057;
+    }
+    
+    .achievement-stat {
+        font-weight: bold;
+        color: #007bff;
+    }
+    
+    .no-achievements {
+        color: #6c757d;
+        font-style: italic;
+        text-align: center;
+        padding: 15px;
+    }
+    
+    /* Efficiency explanation styles */
+    .efficiency-explanation {
+        padding-left: 20px;
+    }
+    
+    .efficiency-explanation li {
+        margin-bottom: 10px;
+    }
+    
+    /* Tab styles */
+    .nav-tabs .nav-link {
+        color: #495057;
+    }
+    
+    .nav-tabs .nav-link.active {
+        font-weight: bold;
+        color: #007bff;
+    }
+</style>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Team comparison chart
+            var ctx = document.getElementById('teamComparisonChart').getContext('2d');
+            var chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['נקודות', 'ריבאונדים', 'אסיסטים', 'חטיפות', 'חסימות', 'איבודים'],
+                    datasets: [
+                        {
+                            label: '@TeamInfo.GetTeamFullName(Model.Team1)',
+                            data: [@Model.Team1Score, @team1TotalRebounds, @team1TotalAssists, @team1TotalSteals, @team1TotalBlocks, @team1TotalTurnovers],
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: '@TeamInfo.GetTeamFullName(Model.Team2)',
+                            data: [@Model.Team2Score, @team2TotalRebounds, @team2TotalAssists, @team2TotalSteals, @team2TotalBlocks, @team2TotalTurnovers],
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

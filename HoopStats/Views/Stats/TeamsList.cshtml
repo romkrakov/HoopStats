@@ -1,5 +1,5 @@
 @using HoopStats.Models
-@model IEnumerable<HoopStats.Controllers.TeamStatsViewModel>
+@model IEnumerable<HoopStats.Models.TeamStatsViewModel>
 
 @{
     ViewData["Title"] = "קבוצות NBA";
@@ -8,40 +8,51 @@
 <div class="container mt-4">
     <h2>סטטיסטיקות קבוצות NBA</h2>
 
-    <div class="table-responsive">
-        <table class="table table-striped align-middle">
-            <thead>
-                <tr>
-                    <th>קבוצה</th>
-                    <th>משחקים</th>
-                    <th>נק' למשחק</th>
-                    <th>מוביל קלעים</th>
-                    <th>נק' למשחק</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var team in Model)
-                {
+    @if (!User.Identity?.IsAuthenticated ?? true)
+    {
+        <div class="alert alert-warning">
+            <h4>גישה מוגבלת</h4>
+            <p>יש להתחבר למערכת כדי לצפות בסטטיסטיקות הקבוצות.</p>
+            <a asp-controller="Home" asp-action="Login" class="btn btn-primary">התחברות</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
                     <tr>
-                        <td>
-                            <a asp-action="TeamStats" asp-route-teamName="@team.TeamName" class="team-cell">
-                                <img src="@TeamInfo.GetTeamLogoPath(team.TeamName)" alt="@TeamInfo.GetTeamHebrewName(team.TeamName)" class="team-logo" />
-                                <span class="team-name">@TeamInfo.GetTeamHebrewName(team.TeamName)</span>
-                            </a>
-                        </td>
-                        <td>@team.GamesPlayed</td>
-                        <td>@team.AveragePoints.ToString("F1")</td>
-                        <td>
-                            <a asp-action="PlayerStats" asp-route-playerName="@team.TopScorerName">
-                                @team.TopScorerName
-                            </a>
-                        </td>
-                        <td>@team.TopScorerPPG.ToString("F1")</td>
+                        <th>קבוצה</th>
+                        <th>משחקים</th>
+                        <th>נק' למשחק</th>
+                        <th>מוביל קלעים</th>
+                        <th>נק' למשחק</th>
                     </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    @foreach (var team in Model)
+                    {
+                        <tr>
+                            <td>
+                                <a asp-action="TeamStats" asp-route-teamName="@team.TeamName" class="team-cell">
+                                    <img src="@TeamInfo.GetTeamLogoPath(team.TeamName)" alt="@TeamInfo.GetTeamHebrewName(team.TeamName)" class="team-logo" />
+                                    <span class="team-name">@TeamInfo.GetTeamHebrewName(team.TeamName)</span>
+                                </a>
+                            </td>
+                            <td>@team.GamesPlayed</td>
+                            <td>@team.AveragePoints.ToString("F1")</td>
+                            <td>
+                                <a asp-action="PlayerStats" asp-route-playerName="@team.TopScorerName">
+                                    @team.TopScorerName
+                                </a>
+                            </td>
+                            <td>@team.TopScorerPPG.ToString("F1")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>
 
 @section Styles {

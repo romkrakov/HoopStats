@@ -1,11 +1,13 @@
+#!/usr/bin/python3
+
 import pandas as pd
 import sqlite3
 import os
 from nba_api.stats.endpoints import playergamelogs
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Define the range of seasons
-start_year = 2023
+start_year = 2022
 current_year = datetime.now().year
 seasons = []
 for year in range(start_year, current_year + 1):
@@ -207,13 +209,13 @@ def update_database():
         WHERE Player != 'Player';  -- Skip header row if it was imported
         """)
         
-        # Step 6: Drop the temporary table
+        # Step 7: Drop the temporary table
         cursor.execute("DROP TABLE IF EXISTS temp_import;")
         
         # Commit the transaction before VACUUM
         conn.commit()
         
-        # Step 7: Vacuum the database to reclaim space (must be outside a transaction)
+        # Step 8: Vacuum the database to reclaim space (must be outside a transaction)
         conn.execute("VACUUM;")
         
         print("Database successfully updated with new game stats!")

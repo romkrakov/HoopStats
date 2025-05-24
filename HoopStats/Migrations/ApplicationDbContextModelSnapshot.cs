@@ -104,6 +104,12 @@ namespace HoopStats.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("GameDate");
+
+                    b.HasIndex("Player");
+
+                    b.HasIndex("Team", "Opponent");
+
                     b.ToTable("GameStats");
                 });
 

@@ -1,0 +1,110 @@
+@model IEnumerable<HoopStats.Models.GameResultViewModel>
+@using HoopStats.Models
+
+@{
+    ViewData["Title"] = "תוצאות משחקים אחרונים";
+}
+
+<div class="container-fluid mt-4 px-4">
+    <h2>תוצאות המשחקים האחרונים</h2>
+
+    @if (!User.Identity?.IsAuthenticated ?? true)
+    {
+        <div class="alert alert-warning">
+            <h4>גישה מוגבלת</h4>
+            <p>יש להתחבר למערכת כדי לצפות בתוצאות המשחקים.</p>
+            <a asp-controller="Home" asp-action="Login" class="btn btn-primary">התחברות</a>
+        </div>
+    }
+    else
+    {
+        <table class="table table-striped stats-table">
+            <thead>
+                <tr>
+                    <th class="col-date">תאריך</th>
+                    <th class="col-team">קבוצת בית</th>
+                    <th class="col-team">קבוצת חוץ</th>
+                    <th class="col-result">תוצאה</th>
+                    <th class="col-winner">מנצחת</th>
+                    <th class="col-player">מצטיין המשחק</th>
+                    <th class="col-points">נק' מצטיין</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var game in Model)
+                {
+                    <tr>
+                        <td>
+                            <a asp-action="GameDetails" 
+                               asp-route-date="@game.GameDate.ToString("yyyy-MM-dd")" 
+                               asp-route-team1="@game.Team1" 
+                               asp-route-team2="@game.Team2" 
+                               class="game-date-link">
+                                @game.GameDate.ToString("dd/MM/yyyy")
+                            </a>
+                        </td>
+                        <td>
+                            <a asp-action="TeamStats" asp-route-teamName="@game.Team1" class="team-cell">
+                                <img src="@TeamInfo.GetTeamLogoPath(game.Team1)" alt="@TeamInfo.GetTeamHebrewName(game.Team1)" class="team-logo-small" />
+                                <span>@TeamInfo.GetTeamHebrewName(game.Team1)</span>
+                            </a>
+                        </td>
+                        <td>
+                            <a asp-action="TeamStats" asp-route-teamName="@game.Team2" class="team-cell">
+                                <img src="@TeamInfo.GetTeamLogoPath(game.Team2)" alt="@TeamInfo.GetTeamHebrewName(game.Team2)" class="team-logo-small" />
+                                <span>@TeamInfo.GetTeamHebrewName(game.Team2)</span>
+                            </a>
+                        </td>
+                        <td class="text-center">
+                            <a asp-action="GameDetails" 
+                               asp-route-date="@game.GameDate.ToString("yyyy-MM-dd")" 
+                               asp-route-team1="@game.Team1" 
+                               asp-route-team2="@game.Team2" 
+                               class="score-link">
+                                <span class="score">@game.Team1Score - @game.Team2Score</span>
+                            </a>
+                        </td>
+                        <td>
+                            <a asp-action="TeamStats" asp-route-teamName="@game.Winner" class="team-cell">
+                                <img src="@TeamInfo.GetTeamLogoPath(game.Winner)" alt="@TeamInfo.GetTeamHebrewName(game.Winner)" class="team-logo-small" />
+                                <span>@TeamInfo.GetTeamHebrewName(game.Winner)</span>
+                            </a>
+                        </td>
+                        <td>
+                            <a asp-action="PlayerStats" asp-route-playerName="@game.TopScorer">@game.TopScorer</a>
+                        </td>
+                        <td>@game.TopScorerPoints</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<style>
+    .score {
+        font-weight: bold;
+        font-size: 1.1em;
+    }
+    
+    .game-date-link, .score-link {
+        color: #0056b3;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+    
+    .game-date-link:hover, .score-link:hover {
+        color: #007bff;
+        text-decoration: underline;
+    }
+    
+    .score-link {
+        display: block;
+        padding: 5px;
+        border-radius: 4px;
+    }
+    
+    .score-link:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+</style>

@@ -1,104 +1,128 @@
 @using HoopStats.Models
-@model IEnumerable<HoopStats.Models.GameStats>
+@model IEnumerable<GameStats>
 
 @{
     ViewData["Title"] = $"{ViewBag.PlayerName} - סטטיסטיקות";
+    var isLatest = ViewBag.IsLatest ?? false;
+    
+    // Use the model directly as GameStats
+    var stats = Model.ToList();
 }
 
 <div class="container-fluid stats-container mt-4">
     <h2>סטטיסטיקות של @ViewBag.PlayerName</h2>
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title">ממוצעים לעונה</h5>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="stat-box">
-                        <span class="stat-label">נק' למשחק</span>
-                        <span class="stat-value">@Model.Average(s => s.Points).ToString("F1")</span>
+    @if (!User.Identity?.IsAuthenticated ?? true)
+    {
+        <div class="alert alert-warning">
+            <h4>גישה מוגבלת</h4>
+            <p>יש להתחבר למערכת כדי לצפות בסטטיסטיקות השחקן.</p>
+            <a asp-controller="Home" asp-action="Login" class="btn btn-primary">התחברות</a>
+        </div>
+    }
+    else
+    {
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">ממוצעים לעונה</h5>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="stat-box">
+                            <span class="stat-label">נק' למשחק</span>
+                            <span class="stat-value">@stats.Average(s => s.Points).ToString("F1")</span>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-box">
-                        <span class="stat-label">ריב' למשחק</span>
-                        <span class="stat-value">@Model.Average(s => s.TotalRebounds).ToString("F1")</span>
+                    <div class="col-md-3">
+                        <div class="stat-box">
+                            <span class="stat-label">ריב' למשחק</span>
+                            <span class="stat-value">@stats.Average(s => s.TotalRebounds).ToString("F1")</span>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-box">
-                        <span class="stat-label">אס' למשחק</span>
-                        <span class="stat-value">@Model.Average(s => s.Assists).ToString("F1")</span>
+                    <div class="col-md-3">
+                        <div class="stat-box">
+                            <span class="stat-label">אס' למשחק</span>
+                            <span class="stat-value">@stats.Average(s => s.Assists).ToString("F1")</span>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-box">
-                        <span class="stat-label">אחוזי קליעה</span>
-                        <span class="stat-value">@{
-                            var fga = Model.Sum(s => s.FieldGoalsAttempted);
-                            if (fga > 0)
-                            {
-                                @((Model.Sum(s => s.FieldGoalsMade) * 100.0 / fga).ToString("F1"))@("%");
-                            }
-                            else
-                            {
-                                @("0.0%");
-                            }
-                        }</span>
+                    <div class="col-md-3">
+                        <div class="stat-box">
+                            <span class="stat-label">אחוזי קליעה</span>
+                            <span class="stat-value">@{
+                                var fga = stats.Sum(s => s.FieldGoalsAttempted);
+                                if (fga > 0)
+                                {
+                                    @((stats.Sum(s => s.FieldGoalsMade) * 100.0 / fga).ToString("F1"))@("%");
+                                }
+                                else
+                                {
+                                    @("0.0%");
+                                }
+                            }</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="table-responsive-xl">
-        <table class="table table-striped align-middle player-stats-table">
-            <thead>
-                <tr>
-                    <th class="col-date">תאריך</th>
-                    <th class="col-team">קבוצה</th>
-                    <th class="col-team">יריבה</th>
-                    <th class="col-num">דקות</th>
-                    <th class="col-num">נק'</th>
-                    <th class="col-num">ריב'</th>
-                    <th class="col-num">אס'</th>
-                    <th class="col-num">חט'</th>
-                    <th class="col-num">חס'</th>
-                    <th class="col-num">זריקות מהשדה</th>
-                    <th class="col-num">שלשות</th>
-                    <th class="col-num">קו העונשין</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var stat in Model)
-                {
+        <div class="table-responsive-xl">
+            <table class="table table-striped align-middle player-stats-table">
+                <thead>
                     <tr>
-                        <td class="col-date">@stat.GameDate.ToShortDateString()</td>
-                        <td class="col-team">
-                            <div class="team-cell">
-                                <img src="@TeamInfo.GetTeamLogoPath(stat.Team)" alt="@TeamInfo.GetTeamHebrewName(stat.Team)" class="team-logo" />
-                                @TeamInfo.GetTeamHebrewName(stat.Team)
-                            </div>
-                        </td>
-                        <td class="col-team">
-                            <div class="team-cell">
-                                <img src="@TeamInfo.GetTeamLogoPath(stat.Opponent)" alt="@TeamInfo.GetTeamHebrewName(stat.Opponent)" class="team-logo" />
-                                @TeamInfo.GetTeamHebrewName(stat.Opponent)
-                            </div>
-                        </td>
-                        <td class="col-num">@stat.MinutesPlayed.ToString("F1")</td>
-                        <td class="col-num">@stat.Points</td>
-                        <td class="col-num">@stat.TotalRebounds</td>
-                        <td class="col-num">@stat.Assists</td>
-                        <td class="col-num">@stat.Steals</td>
-                        <td class="col-num">@stat.Blocks</td>
-                        <td class="col-num">@stat.FieldGoalsMade/@stat.FieldGoalsAttempted</td>
-                        <td class="col-num">@stat.ThreePointersMade/@stat.ThreePointersAttempted</td>
-                        <td class="col-num">@stat.FreeThrowsMade/@stat.FreeThrowsAttempted</td>
+                        <th class="col-date">תאריך</th>
+                        <th class="col-team">קבוצה</th>
+                        <th class="col-team">יריבה</th>
+                        <th class="col-num">דקות</th>
+                        <th class="col-num">נק'</th>
+                        <th class="col-num">ריב'</th>
+                        <th class="col-num">אס'</th>
+                        <th class="col-num">חט'</th>
+                        <th class="col-num">חס'</th>
+                        <th class="col-num">זריקות מהשדה</th>
+                        <th class="col-num">שלשות</th>
+                        <th class="col-num">קו העונשין</th>
                     </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    @foreach (var stat in stats)
+                    {
+                        <tr>
+                            <td class="col-date">
+                                <a asp-controller="Stats" 
+                                   asp-action="GameDetails" 
+                                   asp-route-date="@stat.GameDate.ToString("yyyy-MM-dd")" 
+                                   asp-route-team1="@stat.Team" 
+                                   asp-route-team2="@stat.Opponent" 
+                                   class="game-date-link">
+                                    @(((DateTime)stat.GameDate).ToString("dd/MM/yyyy"))
+                                </a>
+                            </td>
+                            <td class="col-team">
+                                <div class="team-cell">
+                                    <img src="@TeamInfo.GetTeamLogoPath(stat.Team)" alt="@TeamInfo.GetTeamHebrewName(stat.Team)" class="team-logo" />
+                                    @TeamInfo.GetTeamHebrewName(stat.Team)
+                                </div>
+                            </td>
+                            <td class="col-team">
+                                <div class="team-cell">
+                                    <img src="@TeamInfo.GetTeamLogoPath(stat.Opponent)" alt="@TeamInfo.GetTeamHebrewName(stat.Opponent)" class="team-logo" />
+                                    @TeamInfo.GetTeamHebrewName(stat.Opponent)
+                                </div>
+                            </td>
+                            <td class="col-num">@stat.MinutesPlayed.ToString("F1")</td>
+                            <td class="col-num">@stat.Points</td>
+                            <td class="col-num">@stat.TotalRebounds</td>
+                            <td class="col-num">@stat.Assists</td>
+                            <td class="col-num">@stat.Steals</td>
+                            <td class="col-num">@stat.Blocks</td>
+                            <td class="col-num">@stat.FieldGoalsMade/@stat.FieldGoalsAttempted</td>
+                            <td class="col-num">@stat.ThreePointersMade/@stat.ThreePointersAttempted</td>
+                            <td class="col-num">@stat.FreeThrowsMade/@stat.FreeThrowsAttempted</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>
 
 @section Styles {

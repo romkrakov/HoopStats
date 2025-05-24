@@ -36,6 +36,8 @@
     width: 5%; 
 }
 .col-actions { width: 7%; }
+.col-result { width: 10%; }
+.col-winner { width: 15%; }
 
 /* Team cell styling */
 .team-cell {

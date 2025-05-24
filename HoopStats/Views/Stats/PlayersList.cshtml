@@ -1,4 +1,5 @@
-@model IEnumerable<HoopStats.Controllers.PlayerStatsViewModel>
+@using HoopStats.Models
+@model IEnumerable<HoopStats.Models.PlayerStatsViewModel>
 
 @{
     ViewData["Title"] = "שחקני NBA מובילים";
@@ -7,34 +8,45 @@
 <div class="container mt-4">
     <h2>שחקני NBA מובילים</h2>
 
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>דירוג</th>
-                    <th>שחקן</th>
-                    <th>משחקים</th>
-                    <th>נק' למשחק</th>
-                    <th>ריב' למשחק</th>
-                    <th>אס' למשחק</th>
-                </tr>
-            </thead>
-            <tbody>
-                @{
-                    int rank = 1;
-                    foreach (var player in Model)
-                    {
-                        <tr>
-                            <td>@(rank++)</td>
-                            <td><a asp-action="PlayerStats" asp-route-playerName="@player.PlayerName">@player.PlayerName</a></td>
-                            <td>@player.GamesPlayed</td>
-                            <td>@player.AveragePoints.ToString("F1")</td>
-                            <td>@player.AverageRebounds.ToString("F1")</td>
-                            <td>@player.AverageAssists.ToString("F1")</td>
-                        </tr>
+    @if (!User.Identity?.IsAuthenticated ?? true)
+    {
+        <div class="alert alert-warning">
+            <h4>גישה מוגבלת</h4>
+            <p>יש להתחבר למערכת כדי לצפות בסטטיסטיקות השחקנים.</p>
+            <a asp-controller="Home" asp-action="Login" class="btn btn-primary">התחברות</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>דירוג</th>
+                        <th>שחקן</th>
+                        <th>משחקים</th>
+                        <th>נק' למשחק</th>
+                        <th>ריב' למשחק</th>
+                        <th>אס' למשחק</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int rank = 1;
+                        foreach (var player in Model)
+                        {
+                            <tr>
+                                <td>@(rank++)</td>
+                                <td><a asp-action="PlayerStats" asp-route-playerName="@player.PlayerName">@player.PlayerName</a></td>
+                                <td>@player.GamesPlayed</td>
+                                <td>@player.AveragePoints.ToString("F1")</td>
+                                <td>@player.AverageRebounds.ToString("F1")</td>
+                                <td>@player.AverageAssists.ToString("F1")</td>
+                            </tr>
+                        }
                     }
-                }
-            </tbody>
-        </table>
-    </div>
+                </tbody>
+            </table>
+        </div>
+    }
 </div>

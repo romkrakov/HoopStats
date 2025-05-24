@@ -8,92 +8,117 @@
 <div class="container-fluid mt-4 px-4">
     <h2>תוצאות אחרונות</h2>
 
-    @if (User.IsInRole("Admin"))
+    @if (!User.Identity?.IsAuthenticated ?? true)
     {
-        <div class="mb-3">
-            <a asp-action="Import" class="btn btn-primary">Import New Data</a>
+        <div class="alert alert-warning">
+            <h4>גישה מוגבלת</h4>
+            <p>יש להתחבר למערכת כדי לצפות בסטטיסטיקות השחקנים.</p>
+            <a asp-controller="Home" asp-action="Login" class="btn btn-primary">התחברות</a>
         </div>
     }
+    else
+    {
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="mb-3">
+                <a asp-action="Import" class="btn btn-primary">Import New Data</a>
+            </div>
+        }
 
-    <table class="table table-striped stats-table">
-        <thead>
-            <tr>
-                <th class="col-date">תאריך</th>
-                <th class="col-player">שחקן</th>
-                <th class="col-team">קבוצה</th>
-                <th class="col-team">יריבה</th>
-                <th class="col-minutes">דקות</th>
-                <th class="col-points">נק'</th>
-                <th class="col-rebounds">ריב'</th>
-                <th class="col-assists">אס'</th>
-                <th class="col-steals">חט'</th>
-                <th class="col-blocks">חס'</th>
-                <th class="col-actions">פרטים</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var stat in Model)
-            {
+        <table class="table table-striped stats-table">
+            <thead>
                 <tr>
-                    <td>@stat.GameDate.ToShortDateString()</td>
-                    <td><a asp-action="PlayerStats" asp-route-playerName="@stat.Player">@stat.Player</a></td>
-                    <td>
-                        <a asp-action="TeamStats" asp-route-teamName="@stat.Team" class="team-cell">
-                            <img src="@TeamInfo.GetTeamLogoPath(stat.Team)" alt="@TeamInfo.GetTeamHebrewName(stat.Team)" class="team-logo-small" />
-                            <span>@TeamInfo.GetTeamHebrewName(stat.Team)</span>
-                        </a>
-                    </td>
-                    <td>
-                        <a asp-action="TeamStats" asp-route-teamName="@stat.Opponent" class="team-cell">
-                            <img src="@TeamInfo.GetTeamLogoPath(stat.Opponent)" alt="@TeamInfo.GetTeamHebrewName(stat.Opponent)" class="team-logo-small" />
-                            <span>@TeamInfo.GetTeamHebrewName(stat.Opponent)</span>
-                        </a>
-                    </td>
-                    <td>@stat.MinutesPlayed.ToString("F1")</td>
-                    <td>@stat.Points</td>
-                    <td>@stat.TotalRebounds</td>
-                    <td>@stat.Assists</td>
-                    <td>@stat.Steals</td>
-                    <td>@stat.Blocks</td>
-                    <td>
-                        <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#statsModal-@stat.Id">
-                            פרטים
-                        </button>
-                    </td>
+                    <th class="col-date">תאריך</th>
+                    <th class="col-player">שחקן</th>
+                    <th class="col-team">קבוצה</th>
+                    <th class="col-team">יריבה</th>
+                    <th class="col-minutes">דקות</th>
+                    <th class="col-points">נק'</th>
+                    <th class="col-rebounds">ריב'</th>
+                    <th class="col-assists">אס'</th>
+                    <th class="col-steals">חט'</th>
+                    <th class="col-blocks">חס'</th>
+                    <th class="col-actions">פרטים</th>
                 </tr>
+            </thead>
+            <tbody>
+                @foreach (var stat in Model)
+                {
+                    <tr>
+                        <td>    <a asp-controller="Stats" 
+                                   asp-action="GameDetails" 
+                                   asp-route-date="@stat.GameDate.ToString("yyyy-MM-dd")" 
+                                   asp-route-team1="@stat.Team" 
+                                   asp-route-team2="@stat.Opponent" 
+                                   class="game-date-link">
+                                    @(((DateTime)stat.GameDate).ToString("dd/MM/yyyy"))
+                                </a></td>
+                        
+                        <td><a asp-action="PlayerStats" asp-route-playerName="@((stat as dynamic).Player)">@((stat as dynamic).Player)</a></td>
+                        <td>
+                            <a asp-action="TeamStats" asp-route-teamName="@((stat as dynamic).Team)" class="team-cell">
+                                <img src="@TeamInfo.GetTeamLogoPath((stat as dynamic).Team)" alt="@TeamInfo.GetTeamHebrewName((stat as dynamic).Team)" class="team-logo-small" />
+                                <span>@TeamInfo.GetTeamHebrewName((stat as dynamic).Team)</span>
+                            </a>
+                        </td>
+                        <td>
+                            <a asp-action="TeamStats" asp-route-teamName="@((stat as dynamic).Opponent)" class="team-cell">
+                                <img src="@TeamInfo.GetTeamLogoPath((stat as dynamic).Opponent)" alt="@TeamInfo.GetTeamHebrewName((stat as dynamic).Opponent)" class="team-logo-small" />
+                                <span>@TeamInfo.GetTeamHebrewName((stat as dynamic).Opponent)</span>
+                            </a>
+                        </td>
+                        <td>@((stat as dynamic).MinutesPlayed.ToString("F1"))</td>
+                        <td>@((stat as dynamic).Points)</td>
+                        <td>@((stat as dynamic).TotalRebounds)</td>
+                        <td>@((stat as dynamic).Assists)</td>
+                        <td>@((stat as dynamic).Steals)</td>
+                        <td>@((stat as dynamic).Blocks)</td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#statsModal-@((stat as dynamic).Id)">
+                                פרטים
+                            </button>
+                        </td>
+                    </tr>
 
-                <!-- Modal for detailed stats -->
-                <div class="modal fade" id="statsModal-@stat.Id" tabindex="-1">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">@stat.Player - סטטיסטיקות מפורטות</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <p><strong>תאריך:</strong> @stat.GameDate.ToShortDateString()</p>
-                                        <p><strong>קבוצה:</strong> @TeamInfo.GetTeamHebrewName(stat.Team)</p>
-                                        <p><strong>יריבה:</strong> @TeamInfo.GetTeamHebrewName(stat.Opponent)</p>
-                                        <p><strong>תוצאה:</strong> @stat.Result</p>
-                                        <p><strong>דקות:</strong> @stat.MinutesPlayed</p>
+                    <!-- Modal for detailed stats -->
+                    <div class="modal fade" id="statsModal-@((stat as dynamic).Id)" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">@((stat as dynamic).Player) - סטטיסטיקות מפורטות</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p><strong>תאריך:</strong> @DateFormatHelper.FormatDate(((dynamic)stat).GameDate)</p>
+                                            <p><strong>קבוצה:</strong> @TeamInfo.GetTeamHebrewName((stat as dynamic).Team)</p>
+                                            <p><strong>יריבה:</strong> @TeamInfo.GetTeamHebrewName((stat as dynamic).Opponent)</p>
+                                            <p><strong>תוצאה:</strong> @((stat as dynamic).Result)</p>
+                                            <p><strong>דקות:</strong> @((stat as dynamic).MinutesPlayed)</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p><strong>זריקות מהשדה:</strong> @((stat as dynamic).FieldGoalsMade)/@((stat as dynamic).FieldGoalsAttempted) (@((stat as dynamic).FieldGoalPercentage.ToString("P1")))</p>
+                                            <p><strong>שלשות:</strong> @((stat as dynamic).ThreePointersMade)/@((stat as dynamic).ThreePointersAttempted) (@((stat as dynamic).ThreePointPercentage.ToString("P1")))</p>
+                                            <p><strong>קו העונשין:</strong> @((stat as dynamic).FreeThrowsMade)/@((stat as dynamic).FreeThrowsAttempted) (@((stat as dynamic).FreeThrowPercentage.ToString("P1")))</p>
+                                            <p><strong>ריבאונדים:</strong> @((stat as dynamic).TotalRebounds) (התק': @((stat as dynamic).OffensiveRebounds), הגנה: @((stat as dynamic).DefensiveRebounds))</p>
+                                            <p><strong>ציון משחק:</strong> @((stat as dynamic).GameScore.ToString("F1"))</p>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <p><strong>זריקות מהשדה:</strong> @stat.FieldGoalsMade/@stat.FieldGoalsAttempted (@stat.FieldGoalPercentage.ToString("P1"))</p>
-                                        <p><strong>שלשות:</strong> @stat.ThreePointersMade/@stat.ThreePointersAttempted (@stat.ThreePointPercentage.ToString("P1"))</p>
-                                        <p><strong>קו העונשין:</strong> @stat.FreeThrowsMade/@stat.FreeThrowsAttempted (@stat.FreeThrowPercentage.ToString("P1"))</p>
-                                        <p><strong>ריבאונדים:</strong> @stat.TotalRebounds (התק': @stat.OffensiveRebounds, הגנה: @stat.DefensiveRebounds)</p>
-                                        <p><strong>ציון משחק:</strong> @stat.GameScore.ToString("F1")</p>
+                                    <div class="game-details">
+                                        <h5>פרטי משחק</h5>
+                                        <p><strong>תאריך:</strong> @DateFormatHelper.FormatDate(((dynamic)stat).GameDate)</p>
+                                        <p><strong>יריבה:</strong> @TeamInfo.GetTeamHebrewName((stat as dynamic).Opponent)</p>
+                                        <p><strong>תוצאה:</strong> @((stat as dynamic).Result)</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            }
-        </tbody>
-    </table>
+                }
+            </tbody>
+        </table>
+    }
 </div>
 
 @section Scripts {

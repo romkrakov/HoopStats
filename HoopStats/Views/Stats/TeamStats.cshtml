@@ -1,5 +1,5 @@
 @using HoopStats.Models
-@model IEnumerable<HoopStats.Controllers.PlayerStatsViewModel>
+@model IEnumerable<HoopStats.Models.PlayerStatsViewModel>
 
 @{
     var teamFullName = TeamInfo.GetTeamHebrewName(ViewBag.TeamName);
@@ -7,39 +7,50 @@
 }
 
 <div class="container mt-4">
-    <div class="d-flex align-items-center gap-3 mb-4">
-        <img src="@TeamInfo.GetTeamLogoPath(ViewBag.TeamName)" alt="@teamFullName" class="team-logo" style="width: 60px; height: 60px;" />
-        <div>
-            <h2 class="mb-0">@teamFullName</h2>
-            <p class="mb-0 text-muted">@ViewBag.TeamName</p>
+    @if (!User.Identity?.IsAuthenticated ?? true)
+    {
+        <div class="alert alert-warning">
+            <h4>גישה מוגבלת</h4>
+            <p>יש להתחבר למערכת כדי לצפות בסטטיסטיקות הקבוצה.</p>
+            <a asp-controller="Home" asp-action="Login" class="btn btn-primary">התחברות</a>
         </div>
-    </div>
+    }
+    else
+    {
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <img src="@TeamInfo.GetTeamLogoPath(ViewBag.TeamName)" alt="@teamFullName" class="team-logo" style="width: 60px; height: 60px;" />
+            <div>
+                <h2 class="mb-0">@teamFullName</h2>
+                <p class="mb-0 text-muted">@ViewBag.TeamName</p>
+            </div>
+        </div>
 
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>שחקן</th>
-                    <th>משחקים</th>
-                    <th>נק' למשחק</th>
-                    <th>ריב' למשחק</th>
-                    <th>אס' למשחק</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var player in Model)
-                {
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
                     <tr>
-                        <td>
-                            <a asp-action="PlayerStats" asp-route-playerName="@player.PlayerName">@player.PlayerName</a>
-                        </td>
-                        <td>@player.GamesPlayed</td>
-                        <td>@player.AveragePoints.ToString("F1")</td>
-                        <td>@player.AverageRebounds.ToString("F1")</td>
-                        <td>@player.AverageAssists.ToString("F1")</td>
+                        <th>שחקן</th>
+                        <th>משחקים</th>
+                        <th>נק' למשחק</th>
+                        <th>ריב' למשחק</th>
+                        <th>אס' למשחק</th>
                     </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    @foreach (var player in Model)
+                    {
+                        <tr>
+                            <td>
+                                <a asp-action="PlayerStats" asp-route-playerName="@player.PlayerName">@player.PlayerName</a>
+                            </td>
+                            <td>@player.GamesPlayed</td>
+                            <td>@player.AveragePoints.ToString("F1")</td>
+                            <td>@player.AverageRebounds.ToString("F1")</td>
+                            <td>@player.AverageAssists.ToString("F1")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>

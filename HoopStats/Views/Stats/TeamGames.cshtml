@@ -1,0 +1,90 @@
+@model List<HoopStats.Models.TeamGameViewModel>
+@{
+    ViewData["Title"] = $"{ViewBag.TeamName} Games";
+    var isLatest = ViewBag.IsLatest ?? false;
+}
+
+<div class="container mt-4">
+    <h1 class="mb-4">@ViewBag.TeamName Team Games</h1>
+    
+    @if (isLatest)
+    {
+        <div class="alert alert-info">
+            Showing most recent games for @ViewBag.TeamName
+        </div>
+    }
+    
+    <div class="mb-3">
+        <a asp-action="TeamStats" class="btn btn-outline-primary">Back to Teams</a>
+        
+        @if (!isLatest)
+        {
+            <a asp-action="LatestTeamGames" asp-route-teamName="@ViewBag.TeamName" class="btn btn-outline-success">
+                View Latest Games
+            </a>
+        }
+        else
+        {
+            <a asp-action="TeamStats" asp-route-teamName="@ViewBag.TeamName" class="btn btn-outline-secondary">
+                View All Games
+            </a>
+        }
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="alert alert-warning">
+            No games found for @ViewBag.TeamName.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var game in Model)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span>@game.GameDate.ToString("MM/dd/yyyy")</span>
+                            <span class="badge @(game.Result == "W" ? "bg-success" : "bg-danger")">
+                                @game.Result
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">@ViewBag.TeamName vs @game.Opponent</h5>
+                            <h6 class="card-subtitle mb-3 text-muted">Total Points: @game.TotalPoints</h6>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Player</th>
+                                            <th>PTS</th>
+                                            <th>REB</th>
+                                            <th>AST</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var player in game.TeamPlayers.Take(5))
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <a asp-action="PlayerStats" asp-route-playerName="@player.PlayerName">
+                                                        @player.PlayerName
+                                                    </a>
+                                                </td>
+                                                <td>@player.Points</td>
+                                                <td>@player.Rebounds</td>
+                                                <td>@player.Assists</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
