@@ -66,25 +66,31 @@
                         @if (Context.Session.GetString("Username") == null)
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Login">התחברות</a>
+                                <a class="nav-link text-dark" asp-controller="User" asp-action="Login">התחברות</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Register">הרשמה</a>
+                                <a class="nav-link text-dark" asp-controller="User" asp-action="Register">הרשמה</a>
                             </li>
                         }
                         else
                         {
                             @if (Context.Session.GetString("IsAdmin") == "True")
                             {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Home" asp-action="ManageUsers">ניהול משתמשים</a>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link text-dark dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        ניהול מערכת
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="User" asp-action="ManageUsers">ניהול משתמשים</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Data" asp-action="UpdateData">עדכון נתוני NBA</a></li>
+                                    </ul>
                                 </li>
                             }
                             <li class="nav-item">
                                 <span class="nav-link text-dark">שלום, @Context.Session.GetString("Username")</span>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Logout">התנתק</a>
+                                <a class="nav-link text-dark" asp-controller="User" asp-action="Logout">התנתק</a>
                             </li>
                         }
                     </ul>
@@ -115,7 +121,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2024 - HoopStats - <a asp-area="" asp-controller="Home" asp-action="Privacy">פרטיות</a>
+            &copy; 2025 - HoopStats - <a asp-area="" asp-controller="Home" asp-action="Privacy">פרטיות</a>
         </div>
     </footer>
     

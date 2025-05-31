@@ -1,0 +1,376 @@
+@{
+    ViewData["Title"] = "עדכון נתוני NBA";
+}
+
+<style>
+.btn-icon {
+    display: inline-block;
+    margin-left: 8px;
+}
+
+.loading-disabled {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+#updateBtn:disabled {
+    pointer-events: none;
+}
+
+.btn-test {
+    margin-top: 10px;
+}
+</style>
+
+<div class="container mt-4" dir="rtl">
+    <h2>@ViewData["Title"]</h2>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card position-relative">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">עדכון נתוני שחקני NBA</h5>
+                </div>
+                <div class="card-body position-relative">
+                    <div class="alert alert-warning">
+                        <strong>שים לב:</strong> תהליך עדכון הנתונים יכול לקחת מספר דקות ויחליף את כל הנתונים הקיימים במערכת.
+                    </div>
+                    
+                    <!-- Loading Spinner Overlay -->
+                    <div id="loadingOverlay" class="d-none position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" style="background-color: rgba(255, 255, 255, 0.95); z-index: 1000; border-radius: 0.375rem;">
+                        <div class="text-center">
+                            <div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem;">
+                                <span class="visually-hidden">טוען...</span>
+                            </div>
+                            <div class="mt-3">
+                                <h5 class="text-primary">מעדכן נתוני NBA...</h5>
+                                <p class="text-muted mb-2">התהליך יכול לקחת מספר דקות</p>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                                </div>
+                                <small class="text-muted d-block mt-2">אנא אל תסגור את הדפדפן או תנווט לדף אחר</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post" asp-controller="Data" asp-action="UpdateData" id="updateForm">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label for="startYear" class="form-label">שנת התחלה לעדכון הנתונים</label>
+                            <select id="startYear" name="startYear" class="form-select" required>
+                                <option value="">בחר שנת התחלה</option>
+                                @for (int year = 2000; year <= DateTime.Now.Year; year++)
+                                {
+                                    if (year == 2023)
+                                    {
+                                        <option value="@year" selected>@year</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@year">@year</option>
+                                    }
+                                }
+                            </select>
+                            <div class="form-text">
+                                הנתונים יעודכנו מהשנה שנבחרה ועד השנה הנוכחית.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="confirmUpdate" required>
+                                <label class="form-check-label" for="confirmUpdate">
+                                    אני מבין שפעולה זו תמחק את כל הנתונים הקיימים ותחליף אותם בנתונים חדשים
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-2">
+                            <small class="text-muted">
+                                טופס ישלח אל: @Url.Action("UpdateData", "Data") | הרשאת מנהל: @Context.Session.GetString("IsAdmin")
+                            </small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg" id="updateBtn">
+                            <span class="btn-icon">🔄</span> התחל עדכון נתונים
+                        </button>
+                        <a href="@Url.Action("ManageUsers", "User")" class="btn btn-secondary btn-lg" id="cancelBtn">ביטול</a>
+                        
+                        <!-- Test form to verify routing -->
+                        <hr class="my-4">
+                        <form method="post" asp-controller="Data" asp-action="TestPost" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="testValue" value="routing-test">
+                            <!--<button type="submit" class="btn btn-warning btn-sm">🧪 בדיקת ניתוב</button>-->
+                        </form>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">מידע על התהליך</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><strong>מקור הנתונים:</strong> NBA Official API</li>
+                        <li><strong>סוגי משחקים:</strong> עונה רגילה ופלייאוף</li>
+                        <li><strong>זמן עדכון:</strong> 2-10 דקות</li>
+                        <li><strong>תדירות מומלצת:</strong> שבועית</li>
+                    </ul>
+                    
+                    <div class="mt-3">
+                        <h6>נתונים כלולים:</h6>
+                        <small class="text-muted">
+                            נקודות, ריבאונדים, בישולים, חטיפות, חסימות, זריקות, זריקות חופשיות ועוד.
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            @if (Context.Session.GetString("Username") != null)
+            {
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h6>סטטיסטיקות מערכת</h6>
+                        <p class="text-muted mb-0">
+                            משתמש מחובר: <strong>@Context.Session.GetString("Username")</strong><br>
+                            הרשאת מנהל: <strong>@Context.Session.GetString("IsAdmin")</strong><br>
+                            זמן עדכון אחרון: לא זמין
+                        </p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+let isUpdating = false;
+
+function handleFormSubmit(event) {
+    console.log('handleFormSubmit called'); // Debug log
+    
+    // Prevent multiple submissions
+    if (isUpdating) {
+        console.log('Already updating, preventing submission');
+        event.preventDefault();
+        return false;
+    }
+    
+    const startYear = document.getElementById('startYear').value;
+    const confirmCheckbox = document.getElementById('confirmUpdate').checked;
+    
+    console.log('StartYear:', startYear, 'Checkbox:', confirmCheckbox); // Debug log
+    
+    if (!startYear) {
+        event.preventDefault();
+        return false;
+    }
+    
+    if (!confirmCheckbox) {
+        event.preventDefault();
+        return false;
+    }
+    
+    console.log('Starting loading state immediately'); // Debug log
+    
+    // Immediately show loading state
+    startLoadingStateWithoutNavPrevention();
+    
+    // Allow form to submit
+    return true;
+}
+
+// Keep the old function for backward compatibility but simplified
+function confirmUpdate() {
+    return handleFormSubmit({ preventDefault: () => {} });
+}
+
+function startLoadingStateWithoutNavPrevention() {
+    console.log('startLoadingStateWithoutNavPrevention called'); // Debug log
+    
+    // Update button state
+    const btn = document.getElementById('updateBtn');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span> מעדכן נתונים...';
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-warning');
+        console.log('Button updated'); // Debug log
+    }
+    
+    // Disable cancel button
+    const cancelBtn = document.getElementById('cancelBtn');
+    if (cancelBtn) {
+        cancelBtn.style.display = 'none';
+        console.log('Cancel button hidden'); // Debug log
+    }
+    
+    // Show the loading overlay
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.classList.remove('d-none');
+        console.log('Overlay shown'); // Debug log
+    }
+    
+    // Disable all form elements
+    const startYearSelect = document.getElementById('startYear');
+    const confirmCheckbox = document.getElementById('confirmUpdate');
+    
+    if (startYearSelect) startYearSelect.disabled = true;
+    if (confirmCheckbox) confirmCheckbox.disabled = true;
+    
+    // Set navigation prevention after a delay to allow form submission
+    setTimeout(() => {
+        isUpdating = true;
+        window.addEventListener('beforeunload', preventNavigation);
+        console.log('Navigation prevention activated'); // Debug log
+    }, 1000);
+    
+    console.log('Loading state activated without immediate nav prevention'); // Debug log
+}
+
+function startLoadingState() {
+    console.log('startLoadingState called'); // Debug log
+    isUpdating = true;
+    
+    // Update button state
+    const btn = document.getElementById('updateBtn');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span> מעדכן נתונים...';
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-warning');
+        console.log('Button updated'); // Debug log
+    }
+    
+    // Disable cancel button
+    const cancelBtn = document.getElementById('cancelBtn');
+    if (cancelBtn) {
+        cancelBtn.style.display = 'none';
+        console.log('Cancel button hidden'); // Debug log
+    }
+    
+    // Show the loading overlay
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.classList.remove('d-none');
+        console.log('Overlay shown'); // Debug log
+    }
+    
+    // Disable all form elements
+    const startYearSelect = document.getElementById('startYear');
+    const confirmCheckbox = document.getElementById('confirmUpdate');
+    
+    if (startYearSelect) startYearSelect.disabled = true;
+    if (confirmCheckbox) confirmCheckbox.disabled = true;
+    
+    // Prevent page navigation
+    window.addEventListener('beforeunload', preventNavigation);
+    
+    console.log('Loading state fully activated'); // Debug log
+}
+
+function preventNavigation(e) {
+    if (isUpdating) {
+        e.preventDefault();
+        e.returnValue = 'עדכון הנתונים בתהליך. האם אתה בטוח שברצונך לעזוב את הדף?';
+        return 'עדכון הנתונים בתהליך. האם אתה בטוח שברצונך לעזוב את הדף?';
+    }
+}
+
+// Show loading state if there's an info message (indicating update in progress)
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded'); // Debug log
+    
+    const infoMessage = '@TempData["InfoMessage"]';
+    console.log('Info message:', infoMessage); // Debug log
+    
+    if (infoMessage && infoMessage.includes('תהליך עדכון הנתונים החל')) {
+        console.log('Starting loading state from TempData'); // Debug log
+        startLoadingState();
+    }
+    
+    // Also check for error messages that might indicate we're back from an update
+    const errorMessage = '@TempData["ErrorMessage"]';
+    const successMessage = '@TempData["SuccessMessage"]';
+    
+    if (errorMessage || successMessage) {
+        console.log('Update completed with message'); // Debug log
+        isUpdating = false;
+    }
+});
+
+// Auto-refresh page every 30 seconds during update to check for completion
+function checkUpdateStatus() {
+    if (isUpdating) {
+        console.log('Setting up auto-refresh'); // Debug log
+        setTimeout(() => {
+            // Only refresh if we're still on the same page and updating
+            if (window.location.pathname.includes('UpdateData') && isUpdating) {
+                console.log('Auto-refreshing page'); // Debug log
+                window.location.reload();
+            }
+        }, 30000);
+    }
+}
+
+// Start checking for updates if we're in loading state
+document.addEventListener('DOMContentLoaded', function() {
+    if (isUpdating) {
+        checkUpdateStatus();
+    }
+});
+
+// Simplified form handling - let the form submit naturally
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('updateForm');
+    const updateBtn = document.getElementById('updateBtn');
+    
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            console.log('Form submit event triggered'); // Debug log
+            console.log('Form will submit to:', form.action || window.location.href);
+            console.log('Form method:', form.method);
+            
+            // Get form values
+            const startYear = document.getElementById('startYear').value;
+            const confirmCheckbox = document.getElementById('confirmUpdate').checked;
+            
+            console.log('Start year value:', startYear);
+            console.log('Checkbox checked:', confirmCheckbox);
+            
+            // Only show loading state if form is valid
+            if (startYear && confirmCheckbox) {
+                console.log('Form is valid, showing loading state');
+                showLoadingUI();
+            } else {
+                console.log('Form validation failed, letting browser handle it');
+            }
+            
+            // Let the form submit naturally - don't prevent it
+        });
+    }
+});
+
+// Simple function to show loading UI without interfering with form submission
+function showLoadingUI() {
+    const btn = document.getElementById('updateBtn');
+    const overlay = document.getElementById('loadingOverlay');
+    
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span> מעדכן נתונים...';
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-warning');
+    }
+    
+    if (overlay) {
+        overlay.classList.remove('d-none');
+    }
+}
+
+</script>

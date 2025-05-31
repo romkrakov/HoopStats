@@ -45,10 +45,9 @@ namespace HoopStats.Controllers
                 var username = HttpContext.Session.GetString("Username");
                 _logger.LogInformation($"Stats/Index accessed by user: {username}");
                 
-                // Retrieve game stats
+                // Retrieve latest game stats using proper date ordering
                 var regularStats = _context.GameStats
-                    .OrderByDescending(s => s.GameDate)
-                    .Distinct()
+                    .FromSqlRaw("SELECT * FROM GameStats ORDER BY datetime(GameDate) DESC")
                     .Take(50)
                     .ToList();
                 
