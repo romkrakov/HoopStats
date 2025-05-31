@@ -30,7 +30,7 @@
                         <td>@user.LastName</td>
                         <td>@user.Username</td>
                         <td>@user.Email</td>
-                        <td>@user.Gender</td>
+                        <td>@(user.Gender == "male" ? "זכר" : user.Gender == "female" ? "נקבה" : user.Gender)</td>
                         <td>
                             @if (user.IsAdmin)
                             {

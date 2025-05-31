@@ -21,9 +21,9 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 }).AddCookie(options =>
 {
-    options.LoginPath = "/Home/Login";
-    options.LogoutPath = "/Home/Logout";
-    options.AccessDeniedPath = "/Home/AccessDenied";
+    options.LoginPath = "/User/Login";
+    options.LogoutPath = "/User/Logout";
+    options.AccessDeniedPath = "/User/AccessDenied";
     options.Cookie.Name = "HoopStats.Auth";
     options.Cookie.HttpOnly = true;
     options.ExpireTimeSpan = TimeSpan.FromDays(7);

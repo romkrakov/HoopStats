@@ -27,12 +27,11 @@ public class UserController : Controller
     {
         if (ModelState.IsValid)
         {
-            var user = _context.Users.FirstOrDefault(u => 
-                u.Username == model.Username && 
-                u.Password == model.Password);
+            var user = _context.Users.FirstOrDefault(u => u.Username == model.Username);
 
-            if (user != null)
+            if (user != null && user.VerifyPassword(model.Password))
             {
+
                 HttpContext.Session.SetString("UserId", user.Id.ToString());
                 HttpContext.Session.SetString("Username", user.Username);
                 HttpContext.Session.SetString("IsAdmin", user.IsAdmin.ToString());
@@ -63,9 +62,10 @@ public class UserController : Controller
                     LastName = model.LastName,
                     Username = model.Username,
                     Email = model.Email,
-                    Gender = model.Gender,
-                    Password = model.Password
+                    Gender = model.Gender
                 };
+
+                user.SetPassword(model.Password);
 
                 _context.Users.Add(user);
                 _context.SaveChanges();
@@ -153,7 +153,7 @@ public class UserController : Controller
     }
 
     [HttpPost]
-    public IActionResult EditUser(User model)
+    public IActionResult EditUser(User model, string? Password)
     {
         if (!IsAdmin())
         {
@@ -162,20 +162,29 @@ public class UserController : Controller
 
         if (ModelState.IsValid)
         {
-            var user = _context.Users.Find(model.Id);
-            if (user != null)
+            try
             {
-                user.FirstName = model.FirstName;
-                user.LastName = model.LastName;
-                user.Username = model.Username;
-                user.Email = model.Email;
-                user.Gender = model.Gender;
-                if (!string.IsNullOrEmpty(model.Password))
+                var user = _context.Users.Find(model.Id);
+                if (user != null)
                 {
-                    user.Password = model.Password;
+                    user.FirstName = model.FirstName;
+                    user.LastName = model.LastName;
+                    user.Username = model.Username;
+                    user.Email = model.Email;
+                    user.Gender = model.Gender;
+                    // Preserve the original IsAdmin value to prevent tampering
+                    user.IsAdmin = user.IsAdmin;
+                    if (!string.IsNullOrEmpty(Password))
+                    {
+                        user.SetPassword(Password);
+                    }
+                    _context.SaveChanges();
+                    return RedirectToAction("ManageUsers");
                 }
-                _context.SaveChanges();
-                return RedirectToAction("ManageUsers");
+            }
+            catch (DbUpdateException)
+            {
+                ModelState.AddModelError("", "שם המשתמש או כתובת האימייל כבר קיימים במערכת");
             }
         }
         

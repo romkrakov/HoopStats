@@ -30,7 +30,7 @@ namespace HoopStats.Controllers
         private IActionResult RequireLogin()
         {
             TempData["ErrorMessage"] = "יש להתחבר למערכת כדי לצפות בסטטיסטיקות";
-            return RedirectToAction("Login", "Home");
+            return RedirectToAction("Login", "User");
         }
 
         public IActionResult Index()

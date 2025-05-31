@@ -7,9 +7,15 @@
 <div class="container mt-4" dir="rtl">
     <h2>@ViewData["Title"]</h2>
     
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div asp-validation-summary="All" class="alert alert-danger"></div>
+    }
+    
     <form method="post">
         <input type="hidden" asp-for="Id" />
         <input type="hidden" asp-for="IsAdmin" />
+        <input type="hidden" asp-for="PasswordHash" />
         
         <div class="row">
             <div class="col-md-6">
@@ -53,8 +59,8 @@
                     <label asp-for="Gender" class="form-label">מין</label>
                     <select asp-for="Gender" class="form-select" required>
                         <option value="">בחר מין</option>
-                        <option value="זכר">זכר</option>
-                        <option value="נקבה">נקבה</option>
+                        <option value="male">זכר</option>
+                        <option value="female">נקבה</option>
                     </select>
                     <span asp-validation-for="Gender" class="text-danger"></span>
                 </div>
@@ -62,9 +68,8 @@
             
             <div class="col-md-6">
                 <div class="mb-3">
-                    <label asp-for="Password" class="form-label">סיסמה חדשה (השאר ריק אם אין צורך בשינוי)</label>
-                    <input asp-for="Password" type="password" class="form-control" />
-                    <span asp-validation-for="Password" class="text-danger"></span>
+                    <label for="Password" class="form-label">סיסמה חדשה (השאר ריק אם אין צורך בשינוי)</label>
+                    <input name="Password" type="password" class="form-control" />
                 </div>
             </div>
         </div>
