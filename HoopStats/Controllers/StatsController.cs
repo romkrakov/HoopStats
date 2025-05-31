@@ -3,7 +3,6 @@ using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using HoopStats.Models;
 using Microsoft.EntityFrameworkCore;
-using CsvHelper;
 using System.IO;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq;
@@ -68,41 +67,6 @@ namespace HoopStats.Controllers
                 TempData["ErrorMessage"] = $"שגיאה בטעינת נתוני המשחקים: {ex.Message}";
                 _logger.LogError(ex, "Error loading game stats");
                 return RedirectToAction("Index", "Home");
-            }
-        }
-
-        [HttpGet]
-        public IActionResult Import()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Import(IFormFile file)
-        {
-            if (file == null || file.Length == 0)
-            {
-                TempData["Error"] = "Please select a file to import";
-                return RedirectToAction("Import");
-            }
-
-            try
-            {
-                using (var reader = new StreamReader(file.OpenReadStream()))
-                using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
-                {
-                    var records = csv.GetRecords<GameStats>();
-                    await _context.GameStats.AddRangeAsync(records);
-                    await _context.SaveChangesAsync();
-                }
-
-                TempData["Success"] = "Data imported successfully";
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = "Error importing data: " + ex.Message;
-                return RedirectToAction("Import");
             }
         }
 
