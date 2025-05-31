@@ -1,0 +1,76 @@
+@model List<HoopStats.Models.User>
+
+@{
+    ViewData["Title"] = "ניהול משתמשים";
+}
+
+<div class="container mt-4" dir="rtl">
+    <h2>@ViewData["Title"]</h2>
+    
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>שם פרטי</th>
+                    <th>שם משפחה</th>
+                    <th>שם משתמש</th>
+                    <th>אימייל</th>
+                    <th>מין</th>
+                    <th>מנהל</th>
+                    <th>פעולות</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>@user.Id</td>
+                        <td>@user.FirstName</td>
+                        <td>@user.LastName</td>
+                        <td>@user.Username</td>
+                        <td>@user.Email</td>
+                        <td>@user.Gender</td>
+                        <td>
+                            @if (user.IsAdmin)
+                            {
+                                <span class="badge bg-success">כן</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">לא</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="@Url.Action("EditUser", new { id = user.Id })" class="btn btn-sm btn-primary">ערוך</a>
+                                
+                                <form method="post" action="@Url.Action("ToggleAdmin", new { id = user.Id })" style="display: inline;">
+                                    @if (user.IsAdmin)
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('האם אתה בטוח שברצונך להסיר הרשאות מנהל?')">הסר מנהל</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('האם אתה בטוח שברצונך להעניק הרשאות מנהל?')">הפוך למנהל</button>
+                                    }
+                                </form>
+                                
+                                <form method="post" action="@Url.Action("DeleteUser", new { id = user.Id })" style="display: inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('האם אתה בטוח שברצונך למחוק את המשתמש?')">מחק</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            אין משתמשים במערכת.
+        </div>
+    }
+</div>

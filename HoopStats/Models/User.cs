@@ -29,4 +29,6 @@ public class User
 
     [Required]
     public string Password { get; set; } = string.Empty;
+
+    public bool IsAdmin { get; set; } = false;
 }

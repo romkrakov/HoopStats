@@ -7,7 +7,7 @@ from nba_api.stats.endpoints import playergamelogs
 from datetime import datetime, timedelta
 
 # Define the range of seasons
-start_year = 2022
+start_year = 2021
 current_year = datetime.now().year
 seasons = []
 for year in range(start_year, current_year + 1):

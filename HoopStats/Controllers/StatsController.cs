@@ -22,16 +22,28 @@ namespace HoopStats.Controllers
             _logger = logger;
         }
 
-        [Authorize]
+        private bool IsLoggedIn()
+        {
+            return !string.IsNullOrEmpty(HttpContext.Session.GetString("Username"));
+        }
+
+        private IActionResult RequireLogin()
+        {
+            TempData["ErrorMessage"] = "יש להתחבר למערכת כדי לצפות בסטטיסטיקות";
+            return RedirectToAction("Login", "Home");
+        }
+
         public IActionResult Index()
         {
+            if (!IsLoggedIn())
+            {
+                return RequireLogin();
+            }
+
             try
             {
-                // For debugging
-                var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
                 var username = HttpContext.Session.GetString("Username");
-                
-                _logger.LogInformation($"Stats/Index accessed. Auth: {isAuthenticated}, Username: {username}");
+                _logger.LogInformation($"Stats/Index accessed by user: {username}");
                 
                 // Retrieve game stats
                 var regularStats = _context.GameStats
@@ -61,14 +73,12 @@ namespace HoopStats.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
         public IActionResult Import()
         {
             return View();
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Import(IFormFile file)
         {
             if (file == null || file.Length == 0)
@@ -98,9 +108,13 @@ namespace HoopStats.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public IActionResult PlayerStats(string? playerName)
         {
+            if (!IsLoggedIn())
+            {
+                return RequireLogin();
+            }
+
             if (string.IsNullOrEmpty(playerName))
             {
                 // Get player averages
@@ -130,9 +144,13 @@ namespace HoopStats.Controllers
             return View(playerGames);
         }
 
-        [Authorize]
         public IActionResult TeamStats(string? teamName)
         {
+            if (!IsLoggedIn())
+            {
+                return RequireLogin();
+            }
+
             if (string.IsNullOrEmpty(teamName))
             {
                 var teams = _context.GameStats
@@ -206,13 +224,11 @@ namespace HoopStats.Controllers
         /// - Team/Opponent: For faster matchup filtering
         /// - Player: For faster player stats lookup
         /// </summary>
-        [Authorize]
         public IActionResult LatestGames()
         {
-            if (!(User.Identity?.IsAuthenticated ?? false))
+            if (!IsLoggedIn())
             {
-                TempData["ErrorMessage"] = "יש להתחבר למערכת כדי לצפות בתוצאות המשחקים";
-                return RedirectToAction("Login", "Home");
+                return RequireLogin();
             }
             
             try
@@ -334,13 +350,11 @@ namespace HoopStats.Controllers
         /// <param name="date">The date of the game</param>
         /// <param name="team1">The first team in the matchup</param>
         /// <param name="team2">The second team in the matchup</param>
-        [Authorize]
         public IActionResult GameDetails(DateTime date, string team1, string team2)
         {
-            if (!(User.Identity?.IsAuthenticated ?? false))
+            if (!IsLoggedIn())
             {
-                TempData["ErrorMessage"] = "יש להתחבר למערכת כדי לצפות בפרטי המשחק";
-                return RedirectToAction("Login", "Home");
+                return RequireLogin();
             }
             
             try

@@ -3,9 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using HoopStats.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Text.Json;
 
 namespace HoopStats.Controllers;
 
@@ -31,14 +29,10 @@ public class HomeController : Controller
     }
     public IActionResult Login()
     {
-        if (User.Identity?.IsAuthenticated ?? false)
-        {
-            return RedirectToAction("Index");
-        }
         return View();
     }
     [HttpPost]
-    public async Task<IActionResult> Login(LoginViewModel model)
+    public IActionResult Login(LoginViewModel model)
     {
         if (ModelState.IsValid)
         {
@@ -48,26 +42,10 @@ public class HomeController : Controller
 
             if (user != null)
             {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.Username),
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Role, "User")
-                };
-
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var principal = new ClaimsPrincipal(claimsIdentity);
-
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
-                    new AuthenticationProperties
-                    {
-                        IsPersistent = true,
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
-                    });
-
+                // Store user info in session
                 HttpContext.Session.SetString("UserId", user.Id.ToString());
                 HttpContext.Session.SetString("Username", user.Username);
-                
+                HttpContext.Session.SetString("IsAdmin", user.IsAdmin.ToString());
                 TempData["Action"] = "Login";
                 return RedirectToAction("ThankYou", new { id = user.Id });
             }
@@ -82,7 +60,7 @@ public class HomeController : Controller
         return View();
     }
     [HttpPost]
-    public async Task<IActionResult> Register(RegisterViewModel model)
+    public IActionResult Register(RegisterViewModel model)
     {
         if (ModelState.IsValid)
         {
@@ -99,32 +77,14 @@ public class HomeController : Controller
                 };
 
                 _context.Users.Add(user);
-                await _context.SaveChangesAsync();
-
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.Username),
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Role, "User")
-                };
-
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var principal = new ClaimsPrincipal(claimsIdentity);
-
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
-                    new AuthenticationProperties
-                    {
-                        IsPersistent = true,
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
-                    });
-
+                _context.SaveChanges();
                 HttpContext.Session.SetString("UserId", user.Id.ToString());
                 HttpContext.Session.SetString("Username", user.Username);
-                
+                HttpContext.Session.SetString("IsAdmin", user.IsAdmin.ToString());
                 TempData["Action"] = "Register";
                 return RedirectToAction("ThankYou", new { id = user.Id });
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException ex)
             {
                 ModelState.AddModelError("", "שם המשתמש או כתובת האימייל כבר קיימים במערכת");
             }
@@ -142,11 +102,109 @@ public class HomeController : Controller
         return View(user);
     }
 
-    public async Task<IActionResult> Logout()
+    public IActionResult Logout()
     {
-        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         HttpContext.Session.Clear();
         return RedirectToAction("Index");
+    }
+
+    public IActionResult ManageUsers()
+    {
+        if (!IsAdmin())
+        {
+            return Forbid();
+        }
+        
+        var users = _context.Users.ToList();
+        return View(users);
+    }
+
+    [HttpPost]
+    public IActionResult DeleteUser(int id)
+    {
+        if (!IsAdmin())
+        {
+            return Forbid();
+        }
+
+        var user = _context.Users.Find(id);
+        if (user != null)
+        {
+            _context.Users.Remove(user);
+            _context.SaveChanges();
+        }
+        
+        return RedirectToAction("ManageUsers");
+    }
+
+    [HttpPost]
+    public IActionResult ToggleAdmin(int id)
+    {
+        if (!IsAdmin())
+        {
+            return Forbid();
+        }
+
+        var user = _context.Users.Find(id);
+        if (user != null)
+        {
+            user.IsAdmin = !user.IsAdmin;
+            _context.SaveChanges();
+        }
+        
+        return RedirectToAction("ManageUsers");
+    }
+
+    public IActionResult EditUser(int id)
+    {
+        if (!IsAdmin())
+        {
+            return Forbid();
+        }
+
+        var user = _context.Users.Find(id);
+        if (user == null)
+        {
+            return NotFound();
+        }
+        
+        return View(user);
+    }
+
+    [HttpPost]
+    public IActionResult EditUser(User model)
+    {
+        if (!IsAdmin())
+        {
+            return Forbid();
+        }
+
+        if (ModelState.IsValid)
+        {
+            var user = _context.Users.Find(model.Id);
+            if (user != null)
+            {
+                user.FirstName = model.FirstName;
+                user.LastName = model.LastName;
+                user.Username = model.Username;
+                user.Email = model.Email;
+                user.Gender = model.Gender;
+                if (!string.IsNullOrEmpty(model.Password))
+                {
+                    user.Password = model.Password;
+                }
+                _context.SaveChanges();
+                return RedirectToAction("ManageUsers");
+            }
+        }
+        
+        return View(model);
+    }
+
+    private bool IsAdmin()
+    {
+        var isAdminString = HttpContext.Session.GetString("IsAdmin");
+        return bool.TryParse(isAdminString, out bool isAdmin) && isAdmin;
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
