@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using HoopStats.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace HoopStats.Controllers;
 
@@ -20,21 +23,39 @@ public class UserController : Controller
     public IActionResult Login()
     {
         return View();
-    }
-
-    [HttpPost]
-    public IActionResult Login(LoginViewModel model)
+    }    [HttpPost]
+    public async Task<IActionResult> Login(LoginViewModel model)
     {
         if (ModelState.IsValid)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Username == model.Username);
-
-            if (user != null && user.VerifyPassword(model.Password))
+            var user = _context.Users.FirstOrDefault(u => u.Username == model.Username);            if (user != null && user.VerifyPassword(model.Password))
             {
+                // Create claims for the user
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User")
+                };
 
+                // Create claims identity
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                // Sign in the user
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity),
+                    new AuthenticationProperties
+                    {
+                        IsPersistent = true, // This will persist the cookie even after browser close
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
+                    });
+
+                // Set session variables for backward compatibility
                 HttpContext.Session.SetString("UserId", user.Id.ToString());
                 HttpContext.Session.SetString("Username", user.Username);
                 HttpContext.Session.SetString("IsAdmin", user.IsAdmin.ToString());
+                
                 TempData["Action"] = "Login";
                 return RedirectToAction("ThankYou", "Home", new { id = user.Id });
             }
@@ -81,10 +102,9 @@ public class UserController : Controller
             }
         }
         return View(model);
-    }
-
-    public IActionResult Logout()
+    }    public async Task<IActionResult> Logout()
     {
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         HttpContext.Session.Clear();
         return RedirectToAction("Index", "Home");
     }
